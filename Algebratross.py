@@ -387,11 +387,20 @@ def acos(xn, xd):
 	return ans
 
 def valmax(x1, x2):
-
+	max = 0
+	if x1>x2:
+		max = x1
+	else:
+		max = x2
 	return max
 
 def valmin(x1, x2):
-
-	return min 
+	min = 0
+	if x1<x2:
+		min = x1
+	else:
+		min = x2
+	return min
+	
 
 
