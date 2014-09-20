@@ -1,4 +1,8 @@
 #ALGEBRATROSS!!!!!!!
+
+#importing math functions module
+import math
+
 #Python does not have constants so naming conventions will be used
 #variables in all CAPS are CONSTANTS
 ZERO = 0
@@ -364,15 +368,31 @@ def arctan(dx, dy):
 	return ans
 
 def arcsin(x):
-
+	if x = -1:
+		ans = -math.pi/2
+	elif x = 1:
+		ans = math.pi/2
+	else:
+		ans = math.atan(x/math.sqrt(-x*x+1))
 	return ans
 
-def arccos(xx):
-
+def arccos(x):
+	if x = -1:
+		ans = math.pi
+	elif x = 1:
+		ans = 0
+	else:
+		ans = math.atan(-x/math.sqrt(-x*x+1))+2*math.atan(1)
 	return ans
 
 def atan(xn, xd):
-
+	ans = 0
+	if xd == 0 and xn >= 0:
+		ans = 3.14159/2
+	if xd == 0 and xn < 0:
+		ans = -3.14159/2
+	if xd != 0:
+		ans = math.atan(xn/xd)
 	return ans
 
 def Atan(xx, yy):
@@ -384,6 +404,7 @@ def asin(xn, xd):
 	return ans
 
 def acos(xn, xd):
+	
 	return ans
 
 def valmax(x1, x2):
