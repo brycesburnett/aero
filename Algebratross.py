@@ -156,13 +156,61 @@ def intersect(airkap, xpre, ypre, zpre, xx, yy, zz):
 		body(xx, ye, ze, zu, zL)
 		station(ye, ze, zu, zL, beta, xx, yy, zz)
 		c2 = yy
-		if(k>=2)
+		if(k>=2 and g2 != g1):
+			(c2 - c1)/(g2 - g1)
+		g1 = g2
+		c1 = c2
 
 
 def wing(para, chis, xs, ys, zs, chord, omega, delta):
+	#given parametric station, get wing chord, etc
+	#chis = 0.75
+	#xs = 0.5
+	#elevate = 0.07
+	#delta = 0 * PI_RAD/180
+	#ys = para * HSPAN
+	#zs = elevate + ys * Tan(delta)
+	#chord = 0.4 * Sqr(1-math.pow(para,2))
+	#omega = 0
+	
+	wing half planform
+	chis = 0.5
+	ptip = 0.55
+	xo = 0.48
+	chord0 = 8 * HSPAN / (PI_RAD * 16)
+	ys = para * HSPAN
+	if(para < ptip):
+		xs = xo - 0.05 * para + 0.03 * Sin(PI_RAD * para / ptip)
+		chord = chord0
+		#xs = xs + 0.04 / math.exp(13*para)
+	else:
+		etap = (para - ptip)/(1 - ptip)
+		chord = chord0 * math.pow((1 - math.pow(etap,2),0.7)
+		xs = xo + 0.07 * etap
+	#anhedral with flex
+	if(noanhedral < 0.5):
+		zs = -0.35 * math.pow(para,3) + 0.15 * math.pow(para,6)
+	else:
+		zs = 0
+	delta = 0
+	omega = 0
 
 def airfoil(chis, xs, ys, zs, omega, delta, chord, airkap, xx, yy, zz):
-
+	yy = ys
+	xL = xs - chis * chord
+	xm = xL + chord / 2
+	xx = xm + 0.5 * chord * math.cos(airkap)
+	chi = (xx - xL) / chord
+	if(chi > 0 and chi < 1):
+		camber = 0.04 * (chord / 0.4) * math.sin(PI_RAD * math.pow((1 - chi),1.5))
+	else:
+		camber = 0
+	half_thick = 0.045 * chord * math.sin(PI_RAD * math.pow(chi,0.5))
+	if(airkap <= PI_RAD):
+		zz = zs + camber + half_thick
+	else:
+		zz = zs + camber - half_thick
+		
 def body(xx, ye, ze, zu, zL):
 
 def station(ye, ze, zu, zL, beta, xx, yy, zz):
