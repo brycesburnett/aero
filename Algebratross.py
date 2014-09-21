@@ -2,6 +2,8 @@
 
 #importing math functions module
 import math
+#importing CSV for excel format data import
+import csv
 
 #Python does not have constants so naming conventions will be used
 #variables in all CAPS are CONSTANTS
