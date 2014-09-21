@@ -360,11 +360,25 @@ def apply_native_rotation_transform(xxo, yyo, zzo, xxa, yya, zza):
 
 
 def Atan2(xx, yy):
-#ans is number to be returned
+	if xx == 0 and yy == 0:
+		ans = 0
+	elif xx == 0 and yy > 0:
+		ans = 3.14159/2
+	elif xx == 0 and yy < 0:
+		ans = -3.14159/2
+	elif xx > 0:
+		ans = math.atan(yy/xx)
+	else:
+		ans = math.atan(yy/xx) + 3.14159
 	return ans
 
 def arctan(dx, dy):
-
+	if dx == 0 and dy < 0:
+		ans = -math.pi/2
+	elif dx == 0 and dy > 0:
+		ans = math.pi/2
+	else
+		ans = Atan2(dx, dy)
 	return ans
 
 def arcsin(x):
@@ -396,15 +410,20 @@ def atan(xn, xd):
 	return ans
 
 def Atan(xx, yy):
-
+	if xx == 0 and yy < 0:
+		ans - -3.14159/2
+	elif xx == 0 and yy >= 0:
+		ans = 3.14159/2
+	else:
+		ans = math.atan(yy/xx)
 	return ans
 
 def asin(xn, xd):
-
+	ans = math.atan((xn/xd) / math.sqrt(1 - (xn/xd)**2))
 	return ans
 
 def acos(xn, xd):
-	
+	ans = math.atan(math.sqrt(1 - (xn/xd)**2) / (xn/xd))
 	return ans
 
 def valmax(x1, x2):
