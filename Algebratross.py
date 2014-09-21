@@ -248,7 +248,7 @@ def wing_sections():
 	#I don't think the ReDim function is needed as Python arrays are actually lists
 	#wing Le and body subscript for xyz used with wing perimeter:
 	#wing spar body intersect upper and lower xyz subscripts:
-	jLe = (nap + 1) / 2   ' for later integer comparison
+	jLe = (nap + 1) / 2   # for later integer comparison
 	jsu = (jLe - jLe / 3)
 	jsL = (jLe + jLe / 3)
 	#guess of wing te/body intersect
