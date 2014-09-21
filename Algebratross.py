@@ -244,7 +244,7 @@ def wing_sections():
 	#nws = 2: nap = 15
 	nqbc = 15
 	nws = 2
-	nap 39
+	nap = 39
 	#I don't think the ReDim function is needed as Python arrays are actually lists
 	#wing Le and body subscript for xyz used with wing perimeter:
 	#wing spar body intersect upper and lower xyz subscripts:
@@ -297,7 +297,8 @@ def wing_sections():
 def wing_perimeter():
 	#generate perimeter of exposed wing
 	nqbc = 15
-	nwp = 30: ReDim xwp(nwp), ywp(nwp), zwp(nwp)
+	nwp = 30
+	#REDIM NOT NEEDED HERE
 	for i in range(1,nwp)
 	theta = pirad * (i - 1) / (nwp - 1)
 	#theta = pirad * (0.005 + 0.99 * (i - 1) / (nwp - 1))
