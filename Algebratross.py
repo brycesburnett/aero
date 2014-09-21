@@ -111,6 +111,111 @@ Roa = list()
 def draw_bird():
 	#do all the excel clearing here
 	main_geom()
+	irow = 0
+	for k in range(1,2):
+		irow = irow + 1
+		for i in range(1, nwp):
+			irow = irow + 1
+			if(k==1):
+				xx = xwp[i]
+				yy = 0 + ywp[i]
+				zz = zwp[i]
+			else:
+				xx = xwp[i]
+				yy = 0 - ywp[i]
+				zz = zwp[i]
+			#CODE DISPLAYS CELLS HERE
+	#wing sections
+	irow = irow + 1
+	for k in range(1,2):
+		irow = irow + 1
+		for i in range(1, nws):
+			irow = irow + 1
+			for j in range(1,nap):
+				irow = irow+1
+				if(k==1):
+					xx = xws[i][j]
+					yy = 0 + yws[i][j]
+					zz = zws[i][j]
+				else:
+					xx = xws[i][j]
+					yy = 0 - yws[i][j]
+					zz = zws[i][j]
+				#CODE DISPLAYS CELLS HERE
+	#wing spar
+	irow = irow + 1
+	for k in range(1,2):
+		irow = irow + 1
+		for i in range(1,nsp):
+			irow = irow + 1
+			if(k==1):
+				xx = xsp[i]
+				yy = 0 + ysp[i]
+				zz = zsp[i]
+			else:
+				xx = xsp[i]
+				yy = 0 - ysp[i]
+				zz = zsp[i]
+				#CODE DISPLAYS CELLS HERE
+				
+	#body meridian
+	irow = irow + 1
+	for i in range(1,npm):
+		irow = irow + 1
+		xx = xbm[i]
+		yy = ybm[i]
+		zz = zbm[i]
+		#CODE DISPLAYS CELLS HERE
+		
+	#body equator
+	irow = irow + 1
+	for k in range(1,2):
+		irow = irow + 1
+		for i in range(1,neq):
+			irow = irow + 1
+			if(k==1):
+				xx = xeq[i]
+				yy = 0 + yeq[i]
+				zz = zeq[i]
+			else:
+				xx = xeq[i]
+				yy = 0 - yeq[i]
+				zz = zeq[i]
+			#CODE DISPLAYS CELLS HERE
+			
+	#body sections
+	irow = irow + 1
+	for k in range(1,2):
+		irow = irow + 1
+		for i in range(1,nbs):
+			irow = irow + 1
+			for i in range(1,nbp):
+				irow = irow + 1
+				if(k==1):
+					xx = xbs[i][j]
+					yy = 0 + ybs[i][j]
+					zz = zbs[i][j]
+				else:
+					xx = xbs[i][j]
+					yy = 0 - ybs[i][j]
+					zz = zbs[i][j]
+				#CODE DISPLAYS CELLS HERE
+				
+	#eye
+	irow = irow + 1
+	for k in range(1,2):
+		irow = irow + 1
+		for i in range(1,nee):
+			irow = irow + 1
+			if(k==1):
+				xx = xee[i]
+				yy = 0 + yee[i]
+				zz = zee[i]
+			else:
+				xx = xee[i]
+				yy = 0 - yee[i]
+				zz = zee[i]
+			#CODE DISPLAYS CELLS HERE
 
 def main_geom():
 	#construct half-wing, half-body, wb-intersect, eye, etc
