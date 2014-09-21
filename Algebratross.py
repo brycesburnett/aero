@@ -237,18 +237,208 @@ def main_geom():
 		body_eye()
 
 def wing_sections():
+	#wing-body intersect and all other wing sections
+	#subscripts: i=span position, j = airfoil point
+	#note: make nap+1 divisible by 2
+	#nws = 11: nap = 39
+	#nws = 2: nap = 15
+	nqbc = 15
+	nws = 2
+	nap 39
+	#I don't think the ReDim function is needed as Python arrays are actually lists
+	#wing Le and body subscript for xyz used with wing perimeter:
+	#wing spar body intersect upper and lower xyz subscripts:
+	jLe = (nap + 1) / 2   ' for later integer comparison
+	jsu = (jLe - jLe / 3)
+	jsL = (jLe + jLe / 3)
+	#guess of wing te/body intersect
+	para_est = 0.08
+	airkap = 0
+	wing(para_est, chis, xs, ys, zs, chord, omega, delta)
+	airfoil(chis, xs, ys, zs, omega, delta, chord, airkap, xx, yy, zz)
+	rootx = xx
+	rooty = yy
+	rootz = zz
+	for i in range(1, nws):
+		if i==1:
+			para = para_est
+		else:
+			#theta = (i - 1) * 0.9 * pi12 / (nws - 1)
+			#para = pspar + (1 - pspar) * Sin(theta)
+			para = 0.515
+			wing(para, chis, xs, ys, zs, chord, omega, delta)
+			for j in range(1, nap):
+				airkap = (j - 1) * TWO_PI / (nap - 1)
+				if i==1:
+					if j==1:
+						intersect(airkap, rootx, rooty, rootz, xws[i][j], yws[i][j], zws[i][j])
+					if j>1:
+						intersect(airkap, xws[i][j - 1], yws[i][j - 1], zws[i][j - 1], xws[i][j], yws[i][j], zws[i][j])
+						if(j==jLe):
+							xwbLe = xws[i][j]
+							ywbLe = yws[i][j]
+							zwbLe = zws[i][j]
+						elif j==jse:
+							xwbsu = xws[i][j]
+							ywbsu = yws[i][j]
+							zwbsu = zws[i][j]		
+							pspar = para
+						elif j==jjsL:
+							xwbsL = xws[i][j]
+							ywbsL = yws[i][j]
+							zwbsL = zws[i][j]
+						elif j==nap:
+							xwbte = 0.5 * (xws[1][1] + xws[1][nap])
+							ywbte = 0.5 * (yws[1][1] + yws[1][nap])
+							zwbte = 0.5 * (zws[1][1] + zws[1][nap])
+					else:
+						airfoil(chis, xs, ys, zs, omega, delta, chord, airkap, xws[i][j], yws[i][j], zws[i][j])
 
 def wing_perimeter():
+	#generate perimeter of exposed wing
+	nqbc = 15
+	nwp = 30: ReDim xwp(nwp), ywp(nwp), zwp(nwp)
+	for i in range(1,nwp)
+	theta = pirad * (i - 1) / (nwp - 1)
+	#theta = pirad * (0.005 + 0.99 * (i - 1) / (nwp - 1))
+	para = Sin(theta)
+	if i == 1:
+		xwp[i] = xwbte
+		ywp[i] = ywbte
+		zwp[i] = zwbte
+	elif i == nwp
+		xwp[i] = xwbLe
+		ywp[i] = ywbLe
+		zwp[i] = zwbLe
+	else
+		if theta <= PIL2:
+			airkap = 0
+		if theta > pi12:
+			airkap = pirad
+		wing(para, chis, xs, ys, zs, chord, omega, delta)
+		airfoil(chis, xs, ys, zs, omega, delta, chord, airkap, xx, yy, zz)
+		xwp[i] = xx
+		ywp[i] = yy
+		zwp[i] = zz
 
 def wing_spar():
+	#generate exposed wing spar
+	nsta = 13
+	both = 0
+	if both == 1:
+		#show both the upper and lower lines of the spar:
+		nsp = 2 * nsta - 1
+		facts = 1
+	else:
+		#show only the upper line of the spar
+		nsp = nsta
+		facts = 0.5
+	#REDIM NOT NEEDED HERE
+	for i in range(1,nsp):
+		theta = facts * pirad * (i - 1) / (nsp - 1)
+		#minor adjustment of spar nodes
+		theta = theta + 0.08 * (Sin(theta)) ^ 2
+		para = Sin(theta)
+		if i = 1:
+			xsp[i] = xwbsu
+			ysp[i) = ywbsu
+			zsp[i] = zwbsu
+		elif i == nsp and both > 0.5:
+			xsp[i] = xwbsL
+			ysp[i] = ywbsL
+			zsp[i] = zwbsL
+		else:
+			if theta <= pi12:
+				airkap = (3.3 / 5) * pirad
+			if theta > pi12:
+				airkap = (6.7 / 5) * pirad
+			wing(para, chis, xs, ys, zs, chord, omega, delta)
+			airfoil(chis, xs, ys, zs, omega, delta, chord, airkap, xx, yy, zz)
+			xsp[i] = xx
+			ysp[i] = yy
+			zsp[i] = zz
 
-def body_eye():
+def body_eye()
+	#intersection of eye and body
+	nee = 30
+	#REDIM NOT NEEDED HERE
+	x_eye = 0.14
+	z_eye = -0.045
+	r_eye = 0.008
+	n13 = nee / 3
+	n23 = 2 * nee / 3
+	eradius = r_eye
+	for i in range(1,nee):
+		if i <= n13:
+			eradius = r_eye
+		elif i < n23:
+			eradius = 2 * r_eye / 3
+		else:
+			eradius = r_eye / 3
+		theta = 3 * twopi * (i - 1) / (nee - 2)
+		xee[i] = x_eye + eradius * Cos(theta)
+		zee[i] = z_eye + eradius * Sin(theta)
+		body(xee[i], ye, ze, zu, zL)
+		#iteration on beta
+		if i == 1:
+			beta = -(10 / 90) * pi12
+			for j in range(1,3):
+			yee[i] = (zee[i] - ze) / Tan(beta)
+			station(ye, ze, zu, zL, beta, xee[i], yee[i], zz)
+			beta = Atn((zz - ze) / yee[i])
 
 def body_equator():
+	#locus of max width
+	neq = 130
+	#REDIM NOT NEEDED HERE
+	for i in range(1,neq):
+		theta = pirad * (i - 1) / (neq - 1)
+		xeq[i] = 0.5 * body_L * (1 - Cos(theta))
+		body(xeq[i], yeq[i], zeq[i], zu, zL)
 
 def body_meridian():
+	#body profile
+	npm = 130
+	#REDIM NOT NEEDED HERE
+	for i in range(1,npm):
+		theta = twopi * (i - 1) / (npm - 1)
+		xbm[i] = 0.5 * body_L * (1 - Cos(theta))
+		body(xbm[i], ye, ze, zu, zL)
+		if theta <= pirad:
+			tops = 1
+			bots = 0
+		else
+			tops = 0
+			bots = 1
+		ybm[i] = 0
+		zbm[i] = tops * zu + bots * zL
 
 def body_sections():
+	#body sections
+	nbp = 27
+	nbs = 6
+	#REDIM NOT NEEDED HERE
+	for i in range(1,nbs):
+		if i == 1:
+			xx = 0.5 * xwbLe
+		if i == 2:
+			xx = 0.09 * body_L
+		if i == 3:
+			xx = 0.3 * body_L
+		if i == 4:
+			xx = xwbsu
+		if i == 5:
+			xx = xwbte + 0.2 * (body_L - xwbte)
+		if i == 6:
+			xx = xwbte + 0.6 * (body_L - xwbte)
+		body(xx, ye, ze, zu, zL)
+		for j in range(1,nbp):
+			beta = -pi12 + (j - 1) * pirad / (nbp - 1)
+			station(ye, ze, zu, zL, beta, xx, yy, zz)
+			xbs[i][j] = xx
+			ybs[i][j] = yy
+			zbs[i][j] = zz
+
 
 def intersect(airkap, xpre, ypre, zpre, xx, yy, zz):
 	kmax = 3
