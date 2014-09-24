@@ -217,8 +217,8 @@ def CS_quadr(nn, xx, yy, zz, dydx, Xa, Xb, area):
 	
 	#Spline length and height
 	for i in range (i, ns):
-		delx.insert(i, xx(i + 1) - xx(i))
-		eps.insert(i, yy(i + 1) - yy(i))
+		delx.insert(i, xx[i + 1] - xx[i])
+		eps.insert(i, yy[i + 1] - yy[i])
 		
 		#Initialize
 		area = 0
@@ -324,9 +324,9 @@ def Gauss (n, A, L, s):
 		L[k] = Lk
 		for i in range(k+1,n):
 			xm = (A[L[i],k])/A[Lk,k]
-				for j in range(k+1,n):
-					A[L[i],j] = A[L[i],j] - xm*A[Lk,j]
-				A[L[i],k] = xm
+			for j in range(k+1,n):
+				A[L[i],j] = A[L[i],j] - xm*A[Lk,j]
+			A[L[i],k] = xm
   
 def Solve (n, A, L, B, x):
 	for k in range(1,n-1):
