@@ -1,4 +1,4 @@
-  PI_RAD = 3.14159
+PI_RAD = 3.14159
 TWO_PI = 2 * PI_RAD
 RqD = PI_RAD / 180
 
