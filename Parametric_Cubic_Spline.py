@@ -209,7 +209,7 @@ def CS_solve(nn, xx, yy, zz, dydx, keL, dydxL, keR, dydxR):
  		dydx[i] = dydx[ns] + zz[ns] * _del[ns] / 2 + zz[nn] * _del[ns] / 2
 
   
-def CS_quadr(nn, xx(), yy(), zz(), dydx(), Xa, Xb, area):
+def CS_quadr(nn, xx, yy, zz, dydx, Xa, Xb, area):
 	
 	ns = nn - 1
 	delx = []
