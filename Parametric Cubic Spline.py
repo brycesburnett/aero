@@ -114,8 +114,8 @@ def CS_solve(nn, xx, yy, zz, dydx, keL, dydxL, keR, dydxR):
   	eps = []
   	#spline length and height
   	for i in range(1, ns):
-  	_del[i] = xx[i+1] - xx[i]
-  	esp[i] = yy[i+1] - yy[i]
+  		_del[i] = xx[i+1] - xx[i]
+  		esp[i] = yy[i+1] - yy[i]
   	#generate 2D array [A][X]=[B]
   	AA = [[0 for i in xrange(nn)] for i in xrange(nn)]
   	BB = []
