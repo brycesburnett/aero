@@ -90,9 +90,120 @@ def tau_chi(tau, deLta, chi, chi0, chid, chidd):
 	((3 * math.pi)**2) * deLta * math.sin(3 * math.pi * tau))	
 	
 
-def cubic_spline(nn, xx(), yy(), keL, dydxL, keR, dydxR, Xa, Xb, Xo, Yo, dydx(), zz(), area):
+def cubic_spline(nn, xx, yy, keL, dydxL, keR, dydxR, Xa, Xb, Xo, Yo, dydx, zz, area):
+	CS_solve(nn, xx, yy, zz, dydx, keL, dydxL, keR, dydxR)
+	CS_quadr(nn, xx, yy, zz, dydx, Xa, Xb, area)
+	CS_intrip(nn, xx, yy, zz, dydx, Xo, Yo, dydxo, d2ydx2o)
 
-def CS_solve(nn, xx(), yy(), zz(), dydx(), keL, dydxL, keR, dydxR):
+
+def CS_solve(nn, xx, yy, zz, dydx, keL, dydxL, keR, dydxR):
+	if(keL==2):
+		dydxL = 0
+	if(keR==2):
+		dydxR = 0
+	#1st and 2nd derivative arrays
+  	dydx = []
+  	zz = []
+  	#number of splines
+  	ns = nn-1
+  	_del = []
+  	eps = []
+  	#spline length and height
+  	for i in range(1, ns):
+  	_del[i] = xx[i+1] - xx[i]
+  	esp[i] = yy[i+1] - yy[i]
+  	#generate 2D array [A][X]=[B]
+  	AA = [[0 for i in xrange(nn)] for i in xrange(nn)]
+  	BB = []
+  	#avoid user error for edge conditions
+  	if((keL < 1 or keL > 3) or (nn < 4 and keL == 3)):
+  		keL = 1
+  	if((keR < 1 or keR > 3) or (nn < 4 and keR == 3)):
+  		keR = 1
+  	#if(nn < 4 and keL == 3):
+  	#	keL = 1
+  	#if(nn < 4 and keR == 3):
+
+  	#influence coefficient matrix, row i column j
+  	for i in range(1, nn):
+  		for j in range(1, nn):
+  			#init 2d array with 0's as we traverse
+  			#(should already have em but lets be safe!)
+  			AA[i][j] = 0
+  			#1st row (L-edge) stiff end
+  			if(keL == 1 and i == 1 and j == 1):
+  				#if he's hard coding the logic we could just say AA[1][1] here
+  				AA[i][j] = 1
+  			#1st row (L-edge) horizontal end
+  			elif((keL == 0 or keL == 2) and (i == 1 and j == 1)):
+  				#here too
+  				AA[i][j] = _del[1] / 3
+  			elif((keL == 0 or keL == 2) and (i == 1 and j == 2)):
+  				AA[i][j] = _del[1] / 6
+  			#1st row (L-edge) flexible end
+  		elif(keL == 3 and i == 1 and j == 1):
+  			AA[i][j] = 1
+  		elif(keL == 3 and i == 1 and j == 2):
+  			AA[i][j] = -1 - _del[1] / _del[2]
+  		elif(keL == 3 and i == 1 and j == 3):
+  			AA[i][j] = _del[1]/_del[2]
+  		#mid row (all options)
+  		elif(i > 1 and i < nn):
+  			if(j == i-1):
+  				AA[i][j] = _del[i-1] / 6
+  			elif(j == i):
+  				AA[i][j] = (_del[i-1] + _del[i]) / 3
+  			elif(j == i + 1):
+  				AA[i][j] = _del[i] / 6
+  		#nth row (R-edge) stiff end
+  		elif(keR == 1 and i == nn and j == nn):
+  			AA[i][j] = 1
+  		#nthr row (R-edge) horizontal end
+  		elif((keR == 0 or keR == 2) and i == nn and j == nn - 1):
+  			AA[i][j] = -_del[ns] / 6
+  		elif((keR == 0 or keR == 2) and i == nn and j == nn - 0):
+  			AA[i][j] = -_del[ns] / 3
+  		#nth row (R-edge) flexible end
+  		elif(keR == 3 and i == nn and j == nn):
+  			AA[i][j] = 1
+  		elif(keR == 3 and i == nn and j == nn - 1):
+  			AA[i][j] = -1 - _del[nn-1] / _del[nn-2]
+  		elif(keR == 3 and i == nn and j == nn - 2):
+  			AA[i][j] = _del[nn-1] / _del[nn-2]
+  	#init boundary conditions
+  	BB[i]=0
+  	#1st row (L-edge) stiff end
+  	if(keL == 1 and i == 1):
+  		BB[i] = 0
+  	#1st row (L-edge) horizontal end
+  	elif((keL == 0 or keL == 2) and i == 1):
+  		BB[i] = esp[1] / _del[1] - dydxL
+  	#1st row (L-edge) flexible end
+  	elif(keL == 3 and i == 1):
+  		BB[i] = 0
+  	#mid row (all options)
+ 	elif(i > 1 and i < nn):
+ 		BB[i] = esp[i] / _del[i] - esp[i-1] / _del[i-1]
+ 	#nth row (R-edge) stiff end
+ 	elif(keR == 1 and i == nn):
+ 		BB[i] = 0
+ 	#nth row (R-edge) horizontal end
+ 	elif((keR == 0 or keR == 2) and i == nn):
+ 		BB[i] = esp[ns] / _del[ns] - dydxR
+ 	#nth row (R-edge) flexible end
+ 	elif(keR == 3 and i == nn):
+ 		BB[i] = 0
+ #solution for 2nd derivatives, includes aux arrays
+ Gauss(nn, AA, iL, ss)
+ Solve(nn, AA, iL, BB, zz)
+
+ #1st derivateves
+ for i in range(1, nn):
+ 	if(i < nn):
+ 		dydx[i] = eps[i] / _del[i] - zz[i] * _del[i] / 3 - zz[i + 1] * _del[i] / 6
+ 	else:
+ 		dydx[i] = dydx[ns] + zz[ns] * _del[ns] / 2 + zz[nn] * _del[ns] / 2
+
   
 def CS_quadr(nn, xx(), yy(), zz(), dydx(), Xa, Xb, area):
 	
