@@ -339,5 +339,29 @@ def Solve (n, A, L, B, x):
 			Sum = (Sum - (A[L[i],j]*x[j]))
 		x[i] = Sum / A[L[i],i]
 
-def polynomial_(Left_to_Right, n, X_(), Y_(), c()):
+def polynomial_(Left_to_Right, n, X_, Y_, c)
+  Xo = X_[0]; Yo = Y_[0]; Xn = X_[n]; Yn = Y_[n]
+#
+# setup & tab linear-algebra [A][c]=[b] to solve for poly. coef. (c)
+  ReDim A[n, n], c[n], B[n]
+
+  for i in range(1, n):   # row
+    if Left_to_Right == 1:
+    	B[i] = Y_[i] - Yo
+    else: # take deltaY from right-hand end:
+    	B[i] = Y_[n - i] - Yn
+# diagnostic print:
+# Cells(1 + i, 18) = B(i) selected column assumes max n = 10
+    for j in range(1,n):  # column
+        if Left_to_Right == 1: 
+            A[i, j] = math.pow((X_[i] – Xo),j)
+        else: # take deltaX from right-hand end:
+            A[i, j] = math.pow((X_[n - i] - Xn),j)
+# diagnostic print:
+# Cells(1 + i, 7 + j) = A(i, j)
+#
+# solve for coefficients
+  ReDim iL[n], ss[n]; Gauss(n, A[], iL[], ss[]); Solve(n, A[], iL[], B[], c[])
+
+
 
