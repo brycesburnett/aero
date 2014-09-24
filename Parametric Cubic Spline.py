@@ -131,7 +131,35 @@ def CS_intrp(nn, xx(), yy(), zz(), dydx(), Xo, Yo, dydxo, d2ydx2o) #PROBABLY NOT
         d2ydx2o = zzi + (zip1 - zzi) * xmxi / deli
 
 
-def Gauss(n, A(), L(), s()):
+def Gauss ( n, A =[], L = [], s = []):
+	for i in range (1,n):
+		L[i] = i
+		smax = 0
+		for j in range (1,n):
+			if math.abs(A[i,j] > smax):
+				smax = math.abs(A[i,j])
+			next(j)
+			s[i] = smax
+			next(i)
+			for k in range(1,n):
+				rmax = 0
+				for i in range(k,n):
+					R = (math.abs(A[L[i],k]/s[L[i]]))
+					if R > rmax:
+						j = i
+						rmax = R
+					next(i)
+					Lk = L[j]
+					L[j] = L[k]
+					L[k] = Lk
+					for i in range(k+1,n):
+						xm = (A[L[i],k])/A[Lk,k]
+						for j in range(k+1,n):
+							A[L[i],j] = A[L[i],j] - xm*A[Lk,j]
+							next(j)
+							A[L[i],k] = xm
+							next(i)
+							next(k)
   
 def Solve (n, A=[], L=[], B=[], x=[]):
 	for k in range(1,n-1):
