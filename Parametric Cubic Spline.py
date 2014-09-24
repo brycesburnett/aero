@@ -71,15 +71,15 @@ def single_curve_airfoil():
 			y = Yn
 			for j in range(1,n):
 				y = y + c(j) * (x - Xn) ^ j			
-	zetap = y
-	
-	#Leading edge radius and boattail
-	if(tau == 0)
-		betad = -(1 / RqD) * dzdt / chid
-	elif(tau == 0.5)
-		rho = dzdt ^ 2 / chidd 
-	elif(tau == 1)
-		betad = -(1 / RqD) * dzdt / chid
+		zetap = y
+		
+		#Leading edge radius and boattail
+		if(tau == 0)
+			betad = -(1 / RqD) * dzdt / chid
+		elif(tau == 0.5)
+			rho = dzdt ^ 2 / chidd 
+		elif(tau == 1)
+			betad = -(1 / RqD) * dzdt / chid
 
 def tau_chi(tau, deLta, chi, chi0, chid, chidd):
 	chi0 = 1 - math.sin(math.pi * tau) 
