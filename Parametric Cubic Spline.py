@@ -14,7 +14,7 @@ def single_curve_airfoil():
 	tau_S.append(0.5000)
 	tau_S.append(0.8800)
 	tau_S.append(1.0000)
-	tau_chi(tau_S[i], deLta, chi_S[i], chi0, chid, chidd)
+	tau_chi(tau_S, deLta, chi_S, chi0, chid, chidd)
 	zet_S = []
 	zet_S.append(0.0000)
 	zet_S.append(0.0007)
@@ -34,7 +34,7 @@ def single_curve_airfoil():
 		dydxL = 0
 	if(keR==2):
 		dydxR = 0
-	CS_solve(Np, tau_S[], zet_S[], d2zdt2_S[], dzdt_S[], keL, dydxL, keR, dydxR)
+	CS_solve(Np, tau_S, zet_S, d2zdt2_S, dzdt_S, keL, dydxL, keR, dydxR)
 	
 	#get coefficients for degree-n polynomial passing thru spline points
 	Left_to_Right = 1
@@ -45,14 +45,14 @@ def single_curve_airfoil():
 	for i in range(0,n):
 		X_[i] = tau_S[i+1]
 		Y_[i] = zet_S[i+1]
-	polynomial_(Left_to_Right, n, X_[], Y_[], c[])
+	polynomial_(Left_to_Right, n, X_, Y_, c)
 	
 	ns = 41
 	for i in range(1,ns):
 		irow = i+1
 		tau = (i-1) / (ns - 1)
 		tau_chi(tau, deLta, chi, chi0, chid, chidd)
-		CS_intrp(Np, tau_S(), zet_S(), d2zdt2_S(), dzdt_S(), tau, zeta, dzdt, d2zdt2)
+		CS_intrp(Np, tau_S, zet_S, d2zdt2_S, dzdt_S, tau, zeta, dzdt, d2zdt2)
 		Xo = X_[0]
 		Xn = X_[n]
 		Yo = Y_[0]
