@@ -7,6 +7,11 @@ def single_curve_airfoil():
 	deLta = 0.05
 	#3 point design
 	tau_S = []
+	chi_S = []
+	chi = None
+	chi0 = None
+	chid = None
+	chidd = None
 	#hard coded "user inputs"
 	tau_S.append(0.0000)
 	tau_S.append(0.0300)
@@ -75,7 +80,6 @@ def single_curve_airfoil():
 		rho = dzdt ^ 2 / chidd 
 	elif(tau == 1)
 		betad = -(1 / RqD) * dzdt / chid
-
 
 def tau_chi(tau, deLta, chi, chi0, chid, chidd):
 	chi0 = 1 - math.sin(math.pi * tau) 
