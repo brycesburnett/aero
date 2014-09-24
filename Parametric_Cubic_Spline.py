@@ -263,90 +263,81 @@ def CS_quadr(nn, xx, yy, zz, dydx, Xa, Xb, area):
 				area = area + (Xb - xx(nn)) * 0.5 * (2 * yy(nn) + dydx(nn) * (Xb - xx(nn)))	
 	
 	
-def CS_intrp(nn, xx(), yy(), zz(), dydx(), Xo, Yo, dydxo, d2ydx2o) #PROBABLY NOT DONE I THINK I DID STUFF WRONG WHAT IS del(i)??
+def CS_intrp(nn, xx, yy, zz, dydx, Xo, Yo, dydxo, d2ydx2o) #PROBABLY NOT DONE I THINK I DID STUFF WRONG WHAT IS del(i)??
 # Cubic spline interpolation module
 # Interp. Yo(Xo) & get dy/dx, d2y/dx2 at Xo, incl. linear extrap. if req'd
 # All above are inputs, except the results: (Yo, dydxo, & d2ydx2o)
 # Phil Barnes, Feb 2009, Public Domain, www.HowFliesTheAlbatross.com
   ns = nn - 1: ReDim del(ns), eps(ns) # ns = # of splines for nn points
 # spline horizontal and vertical excursions:
+#was changed from insert to append.. insert requires index
   for i in range (1, ns):
-  del.insert(i, xx(i + 1) - xx(i)
-  eps.insert(i, yy(i + 1) - yy(i))
+  	_del.append(i, xx[i + 1] - xx[i]
+  	eps.append(i, yy[i + 1] - yy[i])
   
-  if Xo < xx(1):
+  if (Xo < xx[1]):
 # linear extrapolate left
        Yo = yy[1] + dydx[1] * (Xo - xx[1])
        dydxo = dydx[1] + zz[1] * (Xo - xx[1])
-       d3ydx3 = (zz[2] - zz[1]) / del[1]       # 3rd derivative
+       d3ydx3 = (zz[2] - zz[1]) / _del[1]       # 3rd derivative
        d2ydx2o = zz[1] + d3ydx3 * (Xo - xx[1])
-  elif Xo > xx(nn):
+  elif (Xo > xx[nn]):
 # linear extrapolate right
        Yo = yy[nn] + dydx[nn] * (Xo - xx[nn])
        dydxo = dydx[nn] + zz[nn] * (Xo - xx[nn])
-       d3ydx3 = (zz[nn] - zz[nn - 1]) / del[ns]  # 3rd derivative
+       d3ydx3 = (zz[nn] - zz[nn - 1]) / _del[ns]  # 3rd derivative
        d2ydx2o = zz[1] + d3ydx3 * (Xo - xx[1])
   else: # find applicable spline and interpolate
-    for i in range (1, ns):
-      if xx[i + 1] >= Xo:  # first get shorthand terminology:
-        xmxi = Xo - xx[i]
-        epsi = eps[i] 
-        deli = del[i]
-        yyi = yy[i]
-        zzi = zz[i]
-        dydxi = dydx[i]
-        zip1 = zz[i + 1]
-        Yo = yyi + dydxi * xmxi + zzi * xmxi ^ 2 / 2 + (zip1 - zzi) * xmxi ^ 3 / (6 * deli)
-        dydxo = dydxi + zzi * xmxi + (zip1 - zzi) * xmxi ^ 2 / (2 * deli)
-        d2ydx2o = zzi + (zip1 - zzi) * xmxi / deli
+  	for i in range (1, ns):
+      		if xx[i + 1] >= Xo:  # first get shorthand terminology:
+        		xmxi = Xo - xx[i]
+        		epsi = eps[i] 
+        		deli = del[i]
+        		yyi = yy[i]
+        		zzi = zz[i]
+        		dydxi = dydx[i]
+        		zip1 = zz[i + 1]
+        		#** = ^
+        		Yo = yyi + dydxi * xmxi + zzi * xmxi ** 2 / 2 + (zip1 - zzi) * xmxi ** 3 / (6 * deli)
+        		dydxo = dydxi + zzi * xmxi + (zip1 - zzi) * xmxi ** 2 / (2 * deli)
+        		d2ydx2o = zzi + (zip1 - zzi) * xmxi / deli
 
 
-def Gauss ( n, A =[], L = [], s = []):
+def Gauss (n, A, L, s):
 	for i in range (1,n):
 		L[i] = i
 		smax = 0
 		for j in range (1,n):
-			if math.abs(A[i,j] > smax):
+			if (math.abs(A[i,j] > smax):
 				smax = math.abs(A[i,j])
-			next(j)
-			s[i] = smax
-			next(i)
-			for k in range(1,n):
-				rmax = 0
-				for i in range(k,n):
-					R = (math.abs(A[L[i],k]/s[L[i]]))
-					if R > rmax:
-						j = i
-						rmax = R
-					next(i)
-					Lk = L[j]
-					L[j] = L[k]
-					L[k] = Lk
-					for i in range(k+1,n):
-						xm = (A[L[i],k])/A[Lk,k]
-						for j in range(k+1,n):
-							A[L[i],j] = A[L[i],j] - xm*A[Lk,j]
-							next(j)
-							A[L[i],k] = xm
-							next(i)
-							next(k)
+		s[i] = smax
+		
+	for k in range(1,n):
+		rmax = 0
+		for i in range(k,n):
+			R = (math.abs(A[L[i],k]/s[L[i]]))
+			if (R > rmax):
+				j = i
+				rmax = R
+		Lk = L[j]
+		L[j] = L[k]
+		L[k] = Lk
+		for i in range(k+1,n):
+			xm = (A[L[i],k])/A[Lk,k]
+				for j in range(k+1,n):
+					A[L[i],j] = A[L[i],j] - xm*A[Lk,j]
+				A[L[i],k] = xm
   
-def Solve (n, A=[], L=[], B=[], x=[]):
+def Solve (n, A, L, B, x):
 	for k in range(1,n-1):
 		for i in range(k+1,n):
 			B[L[i]] = (B[L[i]] - A[L[i],k] * B[L[k]])
-			next(i)
-			next(k)
-			x[n] = B[L[n]] / A[L[n],n]
-			for i in range(n-1,1,-1):
-				Sum = B[L[i]]
-				for j in range(i+1,n):
-					Sum = (Sum - (A[L[i],j]*x[j]))
-					next(j)
-					x[i] = Sum / A[L[i],i]
-					next(i)
-
-
+	x[n] = B[L[n]] / A[L[n],n]
+	for i in range(n-1,1,-1):
+		Sum = B[L[i]]
+		for j in range(i+1,n):
+			Sum = (Sum - (A[L[i],j]*x[j]))
+		x[i] = Sum / A[L[i],i]
 
 def polynomial_(Left_to_Right, n, X_(), Y_(), c()):
 
