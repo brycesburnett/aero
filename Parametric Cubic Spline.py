@@ -80,11 +80,14 @@ def single_curve_airfoil():
 def tau_chi(tau, deLta, chi, chi0, chid, chidd):
 	chi0 = 1 - math.sin(math.pi * tau) 
 	
-	chi = 1 - (1 - deLta) * math.sin(math.pi * tau) + deLta * math.sin(3 * math.pi * tau)
+	chi = 1 - ((1 - deLta) * math.sin(math.pi * tau) + 
+	deLta * math.sin(3 * math.pi * tau))
 	
-	chid = -(1 - deLta) * math.pi * math.cos(math.pi * tau) + 3 * math.pi * deLta * math.cos(3 * math.pi * tau)
+	chid = -((1 - deLta) * math.pi * math.cos(math.pi * tau) + 
+	3 * math.pi * deLta * math.cos(3 * math.pi * tau))
 	
-	chidd = (1 - deLta) * (math.pi**2) * math.sin(math.pi * tau) - ((3 * math.pi)**2) * deLta * math.sin(3 * math.pi * tau)	
+	chidd = ((1 - deLta) * (math.pi**2) * math.sin(math.pi * tau) - 
+	((3 * math.pi)**2) * deLta * math.sin(3 * math.pi * tau))	
 	
 
 def cubic_spline(nn, xx(), yy(), keL, dydxL, keR, dydxR, Xa, Xb, Xo, Yo, dydx(), zz(), area):
@@ -92,7 +95,59 @@ def cubic_spline(nn, xx(), yy(), keL, dydxL, keR, dydxR, Xa, Xb, Xo, Yo, dydx(),
 def CS_solve(nn, xx(), yy(), zz(), dydx(), keL, dydxL, keR, dydxR):
   
 def CS_quadr(nn, xx(), yy(), zz(), dydx(), Xa, Xb, area):
+	
+	ns = nn - 1
+	delx = []
+	eps = []
+	
+	#Spline length and height
+	for i in range (i, ns):
+		delx.insert(i, xx(i + 1) - xx(i))
+		eps.insert(i, yy(i + 1) - yy(i))
+		
+		#Initialize
+		area = 0
+		
+		#Begin with full splines
+		for i in range (i, ns):
+			if Xa <= xx(i) and Xb >= xx(i + 1):
+				area = ( area +
+				yy(i) * delx[i] + dydx(i) * ((delx[i]**2)/2) +
+				zz(i) * ((delx[i]**3)/6) +
+				(zz(i+1) - zz(i)) * ((delx[i]**3)/24))
+		
+			#Partial spline, xa
+			if Xa > xx(i) and Xa < xx(i + 1):
+				area = (area +
+				yy(i) * delx[i] + dydx(i) * ((delx[i]**2)/2) +
+				zz(i) * ((delx[i]**3)/6) +
+				(zz(i + 1) - zz(i)) * ((delx[i]**3)/24) -
+				yy(i) * (Xa - xx(i)) + dydx(i) * (((Xa - xx(i))**2)/2) -
+				zz(i) * (((Xa - xx(i))**3)/6) -
+				(zz(i + 1) - zz(i)) * ((Xa - xx(i))**4)/(24 * delx[i]))
+ 
+			#Partial spline, xb
+			if Xb > xx(i) and Xb < xx(i + 1):
+				area = (area +
+				yy(i) * (Xb - xx(i)) + dydx(i) * (((Xb - xx(i))**2)/2) +
+				zz(i) * (((Xb - xx(i))**3)/6) +
+				(zz(i + 1) - zz(i)) * (((Xb - xx(i)**4))/2))
+			
+			#Correct for overlap condition
+			if Xa >= xx(i) and Xb <= xx(i + 1):
+				area = (area -
+				yy(i) * delx[i] + dydx(i) * ((delx[i]**2)/2) -
+				zz(i) * ((delx[i]**3)/6) -
+				(zz(i + 1) - zz(i)) * ((delx[i]**3)/24))
 
+			#Extrapolate left and/or right
+			if Xa < xx(i):
+				area = area + (xx(1) - Xa) * 0.5 * (2 * yy(1) - dydx(1) * (xx(1) - Xa))
+				
+			if Xb > xx(nn):
+				area = area + (Xb - xx(nn)) * 0.5 * (2 * yy(nn) + dydx(nn) * (Xb - xx(nn)))	
+	
+	
 def CS_intrp(nn, xx(), yy(), zz(), dydx(), Xo, Yo, dydxo, d2ydx2o) #PROBABLY NOT DONE I THINK I DID STUFF WRONG WHAT IS del(i)??
 # Cubic spline interpolation module
 # Interp. Yo(Xo) & get dy/dx, d2y/dx2 at Xo, incl. linear extrap. if req'd
