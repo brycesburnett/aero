@@ -76,7 +76,16 @@ def single_curve_airfoil():
 	elif(tau == 1)
 		betad = -(1 / RqD) * dzdt / chid
 
+
 def tau_chi(tau, deLta, chi, chi0, chid, chidd):
+	chi0 = 1 - math.sin(math.pi * tau) 
+	
+	chi = 1 - (1 - deLta) * math.sin(math.pi * tau) + deLta * math.sin(3 * math.pi * tau)
+	
+	chid = -(1 - deLta) * math.pi * math.cos(math.pi * tau) + 3 * math.pi * deLta * math.cos(3 * math.pi * tau)
+	
+	chidd = (1 - deLta) * (math.pi**2) * math.sin(math.pi * tau) - ((3 * math.pi)**2) * deLta * math.sin(3 * math.pi * tau)	
+	
 
 def cubic_spline(nn, xx(), yy(), keL, dydxL, keR, dydxR, Xa, Xb, Xo, Yo, dydx(), zz(), area):
 
