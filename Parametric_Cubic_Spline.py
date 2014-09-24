@@ -225,42 +225,42 @@ def CS_quadr(nn, xx, yy, zz, dydx, Xa, Xb, area):
 		
 		#Begin with full splines
 		for i in range (i, ns):
-			if Xa <= xx(i) and Xb >= xx(i + 1):
-				area = ( area +
-				yy(i) * delx[i] + dydx(i) * ((delx[i]**2)/2) +
-				zz(i) * ((delx[i]**3)/6) +
-				(zz(i+1) - zz(i)) * ((delx[i]**3)/24))
+			if (Xa <= xx[i] and Xb >= xx[i + 1]):
+				area = (area +
+				yy[i] * delx[i] + dydx[i] * ((delx[i]**2)/2) +
+				zz[i] * ((delx[i]**3)/6) +
+				(zz[i+1] - zz[i]) * ((delx[i]**3)/24))
 		
 			#Partial spline, xa
-			if Xa > xx(i) and Xa < xx(i + 1):
+			if (Xa > xx[i] and Xa < xx[i + 1]:
 				area = (area +
-				yy(i) * delx[i] + dydx(i) * ((delx[i]**2)/2) +
-				zz(i) * ((delx[i]**3)/6) +
-				(zz(i + 1) - zz(i)) * ((delx[i]**3)/24) -
-				yy(i) * (Xa - xx(i)) + dydx(i) * (((Xa - xx(i))**2)/2) -
-				zz(i) * (((Xa - xx(i))**3)/6) -
-				(zz(i + 1) - zz(i)) * ((Xa - xx(i))**4)/(24 * delx[i]))
+				yy[i] * delx[i] + dydx[i] * ((delx[i]**2)/2) +
+				zz[i] * ((delx[i]**3)/6) +
+				(zz[i + 1] - zz[i]) * ((delx[i]**3)/24) -
+				yy[i] * (Xa - xx[i]) + dydx[i] * (((Xa - xx[i])**2)/2) -
+				zz[i] * (((Xa - xx[i])**3)/6) -
+				(zz[i + 1] - zz[i]) * ((Xa - xx[i])**4)/(24 * delx[i]))
  
 			#Partial spline, xb
-			if Xb > xx(i) and Xb < xx(i + 1):
+			if (Xb > xx[i] and Xb < xx[i + 1]):
 				area = (area +
-				yy(i) * (Xb - xx(i)) + dydx(i) * (((Xb - xx(i))**2)/2) +
-				zz(i) * (((Xb - xx(i))**3)/6) +
-				(zz(i + 1) - zz(i)) * (((Xb - xx(i)**4))/2))
+				yy[i] * (Xb - xx[i]) + dydx[i] * (((Xb - xx[i])**2)/2) +
+				zz[i] * (((Xb - xx[i])**3)/6) +
+				(zz[i + 1] - zz[i]) * (((Xb - xx[i]**4))/2))
 			
 			#Correct for overlap condition
-			if Xa >= xx(i) and Xb <= xx(i + 1):
+			if Xa >= xx[i] and Xb <= xx[i + 1]:
 				area = (area -
-				yy(i) * delx[i] + dydx(i) * ((delx[i]**2)/2) -
-				zz(i) * ((delx[i]**3)/6) -
-				(zz(i + 1) - zz(i)) * ((delx[i]**3)/24))
+				yy[i] * delx[i] + dydx[i] * ((delx[i]**2)/2) -
+				zz[i] * ((delx[i]**3)/6) -
+				(zz[i + 1] - zz[i]) * ((delx[i]**3)/24))
 
 			#Extrapolate left and/or right
-			if Xa < xx(i):
-				area = area + (xx(1) - Xa) * 0.5 * (2 * yy(1) - dydx(1) * (xx(1) - Xa))
+			if Xa < xx[i]:
+				area = area + (xx[1] - Xa) * 0.5 * (2 * yy[1] - dydx[1] * (xx[1] - Xa))
 				
-			if Xb > xx(nn):
-				area = area + (Xb - xx(nn)) * 0.5 * (2 * yy(nn) + dydx(nn) * (Xb - xx(nn)))	
+			if Xb > xx[nn]:
+				area = area + (Xb - xx[nn]) * 0.5 * (2 * yy[nn] + dydx[nn] * (Xb - xx[nn]))	
 	
 	
 def CS_intrp(nn, xx, yy, zz, dydx, Xo, Yo, dydxo, d2ydx2o) #PROBABLY NOT DONE I THINK I DID STUFF WRONG WHAT IS del(i)??
