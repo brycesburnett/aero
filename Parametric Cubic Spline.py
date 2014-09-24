@@ -92,25 +92,31 @@ def CS_intrp(nn, xx(), yy(), zz(), dydx(), Xo, Yo, dydxo, d2ydx2o) #PROBABLY NOT
   ns = nn - 1: ReDim del(ns), eps(ns) # ns = # of splines for nn points
 # spline horizontal and vertical excursions:
   for i in range (1, ns):
-  del(i) = xx(i + 1) - xx(i): eps(i) = yy(i + 1) - yy(i)
+  del.insert(i, xx(i + 1) - xx(i)
+  eps.insert(i, yy(i + 1) - yy(i))
   
   if Xo < xx(1):
 # linear extrapolate left
-       Yo = yy(1) + dydx(1) * (Xo - xx(1))
-       dydxo = dydx(1) + zz(1) * (Xo - xx(1))
-       d3ydx3 = (zz(2) - zz(1)) / del(1)       # 3rd derivative
-       d2ydx2o = zz(1) + d3ydx3 * (Xo - xx(1))
+       Yo = yy[1] + dydx[1] * (Xo - xx[1])
+       dydxo = dydx[1] + zz[1] * (Xo - xx[1])
+       d3ydx3 = (zz[2] - zz[1]) / del[1]       # 3rd derivative
+       d2ydx2o = zz[1] + d3ydx3 * (Xo - xx[1])
   elif Xo > xx(nn):
 # linear extrapolate right
-       Yo = yy(nn) + dydx(nn) * (Xo - xx(nn))
-       dydxo = dydx(nn) + zz(nn) * (Xo - xx(nn))
-       d3ydx3 = (zz(nn) - zz(nn - 1)) / del(ns)  # 3rd derivative
-       d2ydx2o = zz(1) + d3ydx3 * (Xo - xx(1))
+       Yo = yy[nn] + dydx[nn] * (Xo - xx[nn])
+       dydxo = dydx[nn] + zz[nn] * (Xo - xx[nn])
+       d3ydx3 = (zz[nn] - zz(nn - 1)) / del[ns]  # 3rd derivative
+       d2ydx2o = zz[1] + d3ydx3 * (Xo - xx[1])
   else: # find applicable spline and interpolate
     for i in range (1, ns):
       if xx(i + 1) >= Xo:  # first get shorthand terminology:
-        xmxi = Xo - xx(i): epsi = eps(i): deli = del(i)
-        yyi = yy(i): zzi = zz(i): dydxi = dydx(i): zip1 = zz(i + 1)
+        xmxi = Xo - xx(i)
+        epsi = eps[i] 
+        deli = del[i]
+        yyi = yy[i]
+        zzi = zz[i]
+        dydxi = dydx[i]
+        zip1 = zz[i + 1]
         Yo = yyi + dydxi * xmxi + zzi * xmxi ^ 2 / 2 + (zip1 - zzi) * xmxi ^ 3 / (6 * deli)
         dydxo = dydxi + zzi * xmxi + (zip1 - zzi) * xmxi ^ 2 / (2 * deli)
         d2ydx2o = zzi + (zip1 - zzi) * xmxi / deli
