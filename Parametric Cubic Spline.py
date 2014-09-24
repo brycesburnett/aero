@@ -105,12 +105,12 @@ def CS_intrp(nn, xx(), yy(), zz(), dydx(), Xo, Yo, dydxo, d2ydx2o) #PROBABLY NOT
 # linear extrapolate right
        Yo = yy[nn] + dydx[nn] * (Xo - xx[nn])
        dydxo = dydx[nn] + zz[nn] * (Xo - xx[nn])
-       d3ydx3 = (zz[nn] - zz(nn - 1)) / del[ns]  # 3rd derivative
+       d3ydx3 = (zz[nn] - zz[nn - 1]) / del[ns]  # 3rd derivative
        d2ydx2o = zz[1] + d3ydx3 * (Xo - xx[1])
   else: # find applicable spline and interpolate
     for i in range (1, ns):
-      if xx(i + 1) >= Xo:  # first get shorthand terminology:
-        xmxi = Xo - xx(i)
+      if xx[i + 1] >= Xo:  # first get shorthand terminology:
+        xmxi = Xo - xx[i]
         epsi = eps[i] 
         deli = del[i]
         yyi = yy[i]
