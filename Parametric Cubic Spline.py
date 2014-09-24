@@ -133,7 +133,22 @@ def CS_intrp(nn, xx(), yy(), zz(), dydx(), Xo, Yo, dydxo, d2ydx2o) #PROBABLY NOT
 
 def Gauss(n, A(), L(), s()):
   
-def Solve(n, A(), L(), B(), x()):
+def Solve (n, A=[], L=[], B=[], x=[]):
+	for k in range(1,n-1):
+		for i in range(k+1,n):
+			B[L[i]] = (B[L[i]] - A[L[i],k] * B[L[k]])
+			next(i)
+			next(k)
+			x[n] = B[L[n]] / A[L[n],n]
+			for i in range(n-1,1,-1):
+				Sum = B[L[i]]
+				for j in range(i+1,n):
+					Sum = (Sum - (A[L[i],j]*x[j]))
+					next(j)
+					x[i] = Sum / A[L[i],i]
+					next(i)
+
+
 
 def polynomial_(Left_to_Right, n, X_(), Y_(), c()):
 
