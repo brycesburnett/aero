@@ -2,7 +2,7 @@ PI_RAD = 3.14159
 TWO_PI = 2 * PI_RAD
 RqD = PI_RAD / 180
 
-  
+ 
 def single_curve_airfoil():
 	deLta = 0.05
 	#3 point design
@@ -45,8 +45,7 @@ def single_curve_airfoil():
 	Left_to_Right = 1
 	n = Np - 1
 	c = []
-	X_ = []
-	Y_ = []
+
 	for i in range(0,n):
 		X_[i] = tau_S[i+1]
 		Y_[i] = zet_S[i+1]
@@ -268,7 +267,7 @@ def CS_intrp(nn, xx, yy, zz, dydx, Xo, Yo, dydxo, d2ydx2o) #PROBABLY NOT DONE I 
 # Interp. Yo(Xo) & get dy/dx, d2y/dx2 at Xo, incl. linear extrap. if req'd
 # All above are inputs, except the results: (Yo, dydxo, & d2ydx2o)
 # Phil Barnes, Feb 2009, Public Domain, www.HowFliesTheAlbatross.com
-  ns = nn - 1: ReDim del(ns), eps(ns) # ns = # of splines for nn points
+  ns = nn - 1# ReDim del(ns), eps(ns) # ns = # of splines for nn points
 # spline horizontal and vertical excursions:
 #was changed from insert to append.. insert requires index
   for i in range (1, ns):
@@ -343,8 +342,9 @@ def polynomial_(Left_to_Right, n, X_, Y_, c)
   Xo = X_[0]; Yo = Y_[0]; Xn = X_[n]; Yn = Y_[n]
 #
 # setup & tab linear-algebra [A][c]=[b] to solve for poly. coef. (c)
-  ReDim A[n, n], c[n], B[n]
-
+#  ReDim A[n, n], c[n], B[n]
+# ReDim either deallocates unused array space or adds more but since
+# python lists are mutable, we don't have to use ReDim
   for i in range(1, n):   # row
     if Left_to_Right == 1:
     	B[i] = Y_[i] - Yo
@@ -361,7 +361,8 @@ def polynomial_(Left_to_Right, n, X_, Y_, c)
 # Cells(1 + i, 7 + j) = A(i, j)
 #
 # solve for coefficients
-  ReDim iL[n], ss[n]; Gauss(n, A[], iL[], ss[]); Solve(n, A[], iL[], B[], c[])
+#  ReDim iL[n], ss[n]; 
+Gauss(n, A, iL, ss); Solve(n, A, iL, B, c)
 
 
 
