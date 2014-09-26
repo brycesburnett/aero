@@ -1,0 +1,9 @@
+bpy.ops.mesh.primitive_xyz_function_surface(x_eq="v", y_eq="u", z_eq="-1.0330316*u+2.94379023*u**2-2.17955268*u**3", range_u_min=0, range_u_max=0.514817, range_u_step=32, wrap_u=False, range_v_max=3)
+
+bpy.ops.mesh.primitive_xyz_function_surface(x_eq="v", y_eq="u", z_eq="u-2.16382032*u**2+1.18893216*u**3", range_u_min=0, range_u_max=0.69552, range_u_step=32, wrap_u=False, range_v_max=3)
+
+bpy.ops.mesh.primitive_xyz_function_surface(x_eq="v", y_eq="u", z_eq="-0.32125793+0.83903903*u-0.69259052*u**2+0.17492846*u**3", range_u_min=0.514817, range_u_max=0.92455, range_u_step=32, wrap_u=False, range_v_max=3)
+
+bpy.ops.mesh.primitive_xyz_function_surface(x_eq="v", y_eq="u", z_eq="0.29931682-0.2910491*u-0.30758454*u**2+0.29931682*u**3", range_u_min=0.69552, range_u_max=1, range_u_step=32, wrap_u=False, range_v_max=3)
+
+bpy.ops.mesh.primitive_xyz_function_surface(x_eq="v", y_eq="u", z_eq="-0.10222441+0.12831429*u+0.07613453*u**2-0.10222441*u**3", range_u_min=0.92455, range_u_max=1, range_u_step=32, wrap_u=False, range_v_max=3)
