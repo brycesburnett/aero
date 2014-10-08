@@ -3,314 +3,78 @@ import numpy as np
 
 def addWing(X1,X2,X3,Y1,Y2,Y3):
 
-    num_segments = 2 # number of segments
-    #First, create the matrix
-    matrix_A = np.matrix(np.zeros((4 * num_segments, 4 * num_segments)))
-    matrix_B = np.matrix(np.zeros((4 * num_segments, 1)))
+    delta = 0.05 #shifts initial max thickness aft
+    PIRAD = 3.14159
+    TWOPI = 2 * PIRAD
+    RqD = PIRAD / 180
 
-    #now, fill matrix with calculated x values
-    #note: for matrixes, begins at 0 index
+    Np = 6 #number of points
+    tau_S = np.array(np.zeros(Np)) #plus one because 1 to n is preferred
+    zet_S = np.array(np.zeros(Np))
+    chi_S = np.array(np.zeros(Np))
 
-    end_constraint_left = 1
-    end_constraint_right = 0
-    x_points = [0.0, X3, 1.0]
-    y_points = [0.0, Y3, 0.0]
+    #these points are USER INPUTS
+    tau_S[0] = 0.00
+    tau_S[1] = 0.03
+    tau_S[2] = 0.19
+    tau_S[3] = 0.50
+    tau_S[4] = 0.88
+    tau_S[5] = 1.00
 
-    #first and last segment are special cases
-    #first, calculate bound function
-    #equation in the form: b + c(x) + 2d(x^2)
-    matrix_A[0,0] = 0 #note: a is always 0
-    matrix_A[0,1] = 1 #note: b is always 1
-    matrix_A[0,2] = x_points[0]
-    matrix_A[0,3] = 2 * x_points[0] ** 2
-    matrix_B[0,0] = end_constraint_left
+    zet_S[0] = 0.00
+    zet_S[1] = 0.0007
+    zet_S[2] = -0.049
+    zet_S[3] = 0.00
+    zet_S[4] = 0.0488
+    zet_S[5] = 0.00
 
-    #next, work on segment 0
+    #call tau_chi
 
-    #equation in the form: a + b(x) + c(x^2) + d(x^3) = y
-    #curve through first point
-    matrix_A[1,0] = 1 #note: a is always 1
-    matrix_A[1,1] = x_points[0]
-    matrix_A[1,2] = x_points[0] ** 2
-    matrix_A[1,3] = x_points[0] ** 3
-    matrix_B[1,0] = y_points[0]
+    for i in range(0, Np):
+        chi_S[i] = 1 - (1 - delta) * math.sin(PIRAD * tau_S[i])
 
-    #curve through second point
-    matrix_A[2,0] = 1 #note: a is always 1
-    matrix_A[2,1] = x_points[1]
-    matrix_A[2,2] = x_points[1] ** 2
-    matrix_A[2,3] = x_points[1] ** 3
-    matrix_B[2,0] = y_points[1]
+    Left_to_Right = 1
+    n = Np - 1
+    c = np.array(np.zeros(n))
+    X = np.array(np.zeros(Np))
+    Y = np.array(np.zeros(Np))
 
-    #slope match between first and second points, first derivative
-    #equation in the form: b_i + 2c_i(x_i_1) + 3d_i(x_i_1^2) - b_i_1 - 2c_i_1(x_i_1)  3d_i_1(x_i_1^2) = 0
-    matrix_A[3,0] = 0 #note: a is always 0
-    matrix_A[3,1] = 1 #note: b is always 1
-    matrix_A[3,2] = 2 * x_points[1]
-    matrix_A[3,3] = 3 * x_points[1] ** 2
-    matrix_A[3,4] = 0 #note: a is always 0
-    matrix_A[3,5] = -1 #note: b is always -1
-    matrix_A[3,6] = -2 * x_points[1]
-    matrix_A[3,7] = -3 * x_points[1] ** 2
-    matrix_B[3,0] = 0
+    for i in range(0,Np):
+        X[i] = tau_S[i]
+        Y[i] = zet_S[i]
 
-    #curve match between first and second points, second derivative
-    #equation in the form 2c_i + 6d_i(x_i_1) - 2c_i_1 - 6d_i_1(x_i_1) = 0
-    matrix_A[4,0] = 0 #note: a is always 0
-    matrix_A[4,1] = 0 #note: b is always 0
-    matrix_A[4,2] = 2
-    matrix_A[4,3] = 6 * x_points[1]
-    matrix_A[4,4] = 0 #note: a is always 0
-    matrix_A[4,5] = 0 #note: b is always 0
-    matrix_A[4,6] = -2
-    matrix_A[4,7] = -6 * x_points[1]
-    matrix_B[4,0] = 0
+    #call polynomial
+    Xo = X[0]
+    Yo = Y[0]
+    Xn = X[n]
+    Yn = Y[n]
 
+    A = np.matrix(np.zeros((n,n)))
+    B = np.matrix(np.zeros((n,1)))
 
-    #for middle functions
-    repeat = num_segments - 2
-    row = 5
-    column = 4
-    iteration = 2
-    for i in range(0, repeat):
-        print(row,column)
-        #equation in the form: a + b(x) + c(x^2) + d(x^3) = y
-        #curve through first point
-        matrix_A[row,column] = 1 #note: a is always 1
-        matrix_A[row,column+1] = x_points[iteration-1]
-        matrix_A[row,column+2] = x_points[iteration-1] ** 2
-        matrix_A[row,column+3] = x_points[iteration-1] ** 3
-        matrix_B[row,0] = y_points[iteration-1]
+    for i in range(0, n):
+        if(Left_to_Right == 1):
+            B[i] = Y[i+1] - Yo
+        else:
+            B[i] = Y[n-i] - Yn
+        for j in range(0, n):
+            if(Left_to_Right == 1):
+                A[i,j] = (X[i+1] - Xo) ** (j+1)
+            else:
+                A[i,j] = (X[n] - Xn) ** (j+1)
 
-        #curve through second point
-        matrix_A[row+1,column] = 1 #note: a is always 1
-        matrix_A[row+1,column+1] = x_points[iteration]
-        matrix_A[row+1,column+2] = x_points[iteration] ** 2
-        matrix_A[row+1,column+3] = x_points[iteration] ** 3
-        matrix_B[row+1,0] = y_points[iteration]
+    #call gauss and solve
 
-        #slope match between first and second points, first derivative
-        #equation in the form: b_i + 2c_i(x_i_1) + 3d_i(x_i_1^2) - b_i_1 - 2c_i_1(x_i_1)  3d_i_1(x_i_1^2) = 0
-        matrix_A[row+2,column] = 0 #note: a is always 0
-        matrix_A[row+2,column+1] = 1 #note: b is always 1
-        matrix_A[row+2,column+2] = 2 * x_points[iteration]
-        matrix_A[row+2,column+3] = 3 * x_points[iteration] ** 2
-        matrix_A[row+2,column+4] = 0 #note: a is always 0
-        matrix_A[row+2,column+5] = -1 #note: b is always -1
-        matrix_A[row+2,column+6] = -2 * x_points[iteration]
-        matrix_A[row+2,column+7] = -3 * x_points[iteration] ** 2
-        matrix_B[row+2,0] = 0
+    coefficient = np.linalg.solve(A,B)
+    y_equation = "1-(1-"+str(delta)+")*sin(pi*u)+"+str(delta)+"*sin(3*pi*u)"
 
-        #curve match between first and second points, second derivative
-        #equation in the form 2c_i + 6d_i(x_i_1) - 2c_i_1 - 6d_i_1(x_i_1) = 0
-        matrix_A[row+3,column] = 0 #note: a is always 0
-        matrix_A[row+3,column+1] = 0 #note: b is always 0
-        matrix_A[row+3,column+2] = 2
-        matrix_A[row+3,column+3] = 6 * x_points[iteration]
-        matrix_A[row+3,column+4] = 0 #note: a is always 0
-        matrix_A[row+3,column+5] = 0 #note: b is always 0
-        matrix_A[row+3,column+6] = -2
-        matrix_A[row+3,column+7] = -6 * x_points[iteration]
-        matrix_B[row+3,0] = 0
-        row = row + 4
-        column = column + 4
-        iteration = iteration + 1
-
-    #work on last segments
-    #equation in the form: a + b(x) + c(x^2) + d(x^3) = y
-    #curve through second to last point
-    matrix_A[4*num_segments - 3, 4*num_segments - 4] = 1
-    matrix_A[4*num_segments - 3, 4*num_segments - 3] = x_points[len(x_points)-2]
-    matrix_A[4*num_segments - 3, 4*num_segments - 2] = x_points[len(x_points)-2] ** 2
-    matrix_A[4*num_segments - 3, 4*num_segments - 1] = x_points[len(x_points)-2] ** 3
-    matrix_B[4*num_segments - 3, 0] = y_points[len(y_points)-2]
-
-    #curve through last point
-    matrix_A[4*num_segments - 2, 4*num_segments - 4] = 1
-    matrix_A[4*num_segments - 2, 4*num_segments - 3] = x_points[len(x_points)-1]
-    matrix_A[4*num_segments - 2, 4*num_segments - 2] = x_points[len(x_points)-1] ** 2
-    matrix_A[4*num_segments - 2, 4*num_segments - 1] = x_points[len(x_points)-1] ** 3
-    matrix_B[4*num_segments - 2, 0] = y_points[len(y_points)-1]
-
-    matrix_A[4*num_segments - 1, 4*num_segments - 4] = 0
-    matrix_A[4*num_segments - 1, 4*num_segments - 3] = 1
-    matrix_A[4*num_segments - 1, 4*num_segments - 2] = x_points[len(x_points)-1]
-    matrix_A[4*num_segments - 1, 4*num_segments - 1] = 2* x_points[len(x_points)-1] ** 2
-    matrix_B[4*num_segments - 1,0] = end_constraint_right
-
-    coefficient_upper = np.linalg.solve(matrix_A, matrix_B)
-
-
-    #------------------------------------------------------------------------------------
-
-    num_segments = 3 # number of segments
-    #First, create the matrix
-    matrix_A = np.matrix(np.zeros((4 * num_segments, 4 * num_segments)))
-    matrix_B = np.matrix(np.zeros((4 * num_segments, 1)))
-
-    #now, fill matrix with calculated x values
-    #note: for matrixes, begins at 0 index
-
-    end_constraint_left = 0
-    end_constraint_right = 0
-    x_points = [1.0, X1, X2, 0.0]
-    y_points = [0.0, Y1, Y2, 0.0]
-
-    #first and last segment are special cases
-    #first, calculate bound function
-    #equation in the form: b + c(x) + 2d(x^2)
-    matrix_A[0,0] = 0 #note: a is always 0
-    matrix_A[0,1] = 1 #note: b is always 1
-    matrix_A[0,2] = x_points[0]
-    matrix_A[0,3] = 2 * x_points[0] ** 2
-    matrix_B[0,0] = end_constraint_left
-
-    #next, work on segment 0
-
-    #equation in the form: a + b(x) + c(x^2) + d(x^3) = y
-    #curve through first point
-    matrix_A[1,0] = 1 #note: a is always 1
-    matrix_A[1,1] = x_points[0]
-    matrix_A[1,2] = x_points[0] ** 2
-    matrix_A[1,3] = x_points[0] ** 3
-    matrix_B[1,0] = y_points[0]
-
-    #curve through second point
-    matrix_A[2,0] = 1 #note: a is always 1
-    matrix_A[2,1] = x_points[1]
-    matrix_A[2,2] = x_points[1] ** 2
-    matrix_A[2,3] = x_points[1] ** 3
-    matrix_B[2,0] = y_points[1]
-
-    #slope match between first and second points, first derivative
-    #equation in the form: b_i + 2c_i(x_i_1) + 3d_i(x_i_1^2) - b_i_1 - 2c_i_1(x_i_1)  3d_i_1(x_i_1^2) = 0
-    matrix_A[3,0] = 0 #note: a is always 0
-    matrix_A[3,1] = 1 #note: b is always 1
-    matrix_A[3,2] = 2 * x_points[1]
-    matrix_A[3,3] = 3 * x_points[1] ** 2
-    matrix_A[3,4] = 0 #note: a is always 0
-    matrix_A[3,5] = -1 #note: b is always -1
-    matrix_A[3,6] = -2 * x_points[1]
-    matrix_A[3,7] = -3 * x_points[1] ** 2
-    matrix_B[3,0] = 0
-
-    #curve match between first and second points, second derivative
-    #equation in the form 2c_i + 6d_i(x_i_1) - 2c_i_1 - 6d_i_1(x_i_1) = 0
-    matrix_A[4,0] = 0 #note: a is always 0
-    matrix_A[4,1] = 0 #note: b is always 0
-    matrix_A[4,2] = 2
-    matrix_A[4,3] = 6 * x_points[1]
-    matrix_A[4,4] = 0 #note: a is always 0
-    matrix_A[4,5] = 0 #note: b is always 0
-    matrix_A[4,6] = -2
-    matrix_A[4,7] = -6 * x_points[1]
-    matrix_B[4,0] = 0
-
-
-    #for middle functions
-    repeat = num_segments - 2
-    row = 5
-    column = 4
-    iteration = 2
-    for i in range(0, repeat):
-        print(row,column)
-        #equation in the form: a + b(x) + c(x^2) + d(x^3) = y
-        #curve through first point
-        matrix_A[row,column] = 1 #note: a is always 1
-        matrix_A[row,column+1] = x_points[iteration-1]
-        matrix_A[row,column+2] = x_points[iteration-1] ** 2
-        matrix_A[row,column+3] = x_points[iteration-1] ** 3
-        matrix_B[row,0] = y_points[iteration-1]
-
-        #curve through second point
-        matrix_A[row+1,column] = 1 #note: a is always 1
-        matrix_A[row+1,column+1] = x_points[iteration]
-        matrix_A[row+1,column+2] = x_points[iteration] ** 2
-        matrix_A[row+1,column+3] = x_points[iteration] ** 3
-        matrix_B[row+1,0] = y_points[iteration]
-
-        #slope match between first and second points, first derivative
-        #equation in the form: b_i + 2c_i(x_i_1) + 3d_i(x_i_1^2) - b_i_1 - 2c_i_1(x_i_1)  3d_i_1(x_i_1^2) = 0
-        matrix_A[row+2,column] = 0 #note: a is always 0
-        matrix_A[row+2,column+1] = 1 #note: b is always 1
-        matrix_A[row+2,column+2] = 2 * x_points[iteration]
-        matrix_A[row+2,column+3] = 3 * x_points[iteration] ** 2
-        matrix_A[row+2,column+4] = 0 #note: a is always 0
-        matrix_A[row+2,column+5] = -1 #note: b is always -1
-        matrix_A[row+2,column+6] = -2 * x_points[iteration]
-        matrix_A[row+2,column+7] = -3 * x_points[iteration] ** 2
-        matrix_B[row+2,0] = 0
-
-        #curve match between first and second points, second derivative
-        #equation in the form 2c_i + 6d_i(x_i_1) - 2c_i_1 - 6d_i_1(x_i_1) = 0
-        matrix_A[row+3,column] = 0 #note: a is always 0
-        matrix_A[row+3,column+1] = 0 #note: b is always 0
-        matrix_A[row+3,column+2] = 2
-        matrix_A[row+3,column+3] = 6 * x_points[iteration]
-        matrix_A[row+3,column+4] = 0 #note: a is always 0
-        matrix_A[row+3,column+5] = 0 #note: b is always 0
-        matrix_A[row+3,column+6] = -2
-        matrix_A[row+3,column+7] = -6 * x_points[iteration]
-        matrix_B[row+3,0] = 0
-        row = row + 4
-        column = column + 4
-        iteration = iteration + 1
-
-    #work on last segments
-    #equation in the form: a + b(x) + c(x^2) + d(x^3) = y
-    #curve through second to last point
-    matrix_A[4*num_segments - 3, 4*num_segments - 4] = 1
-    matrix_A[4*num_segments - 3, 4*num_segments - 3] = x_points[len(x_points)-2]
-    matrix_A[4*num_segments - 3, 4*num_segments - 2] = x_points[len(x_points)-2] ** 2
-    matrix_A[4*num_segments - 3, 4*num_segments - 1] = x_points[len(x_points)-2] ** 3
-    matrix_B[4*num_segments - 3, 0] = y_points[len(y_points)-2]
-
-    #curve through last point
-    matrix_A[4*num_segments - 2, 4*num_segments - 4] = 1
-    matrix_A[4*num_segments - 2, 4*num_segments - 3] = x_points[len(x_points)-1]
-    matrix_A[4*num_segments - 2, 4*num_segments - 2] = x_points[len(x_points)-1] ** 2
-    matrix_A[4*num_segments - 2, 4*num_segments - 1] = x_points[len(x_points)-1] ** 3
-    matrix_B[4*num_segments - 2, 0] = y_points[len(y_points)-1]
-
-    matrix_A[4*num_segments - 1, 4*num_segments - 4] = 0
-    matrix_A[4*num_segments - 1, 4*num_segments - 3] = 1
-    matrix_A[4*num_segments - 1, 4*num_segments - 2] = x_points[len(x_points)-1]
-    matrix_A[4*num_segments - 1, 4*num_segments - 1] = 2* x_points[len(x_points)-1] ** 2
-    matrix_B[4*num_segments - 1,0] = end_constraint_right
-
-    coefficient_lower = np.linalg.solve(matrix_A, matrix_B)
-    a1 = coefficient_upper.item(4)
-    b1 = coefficient_upper.item(5)
-    c1 = coefficient_upper.item(6)
-    d1 = coefficient_upper.item(7)
-    a2 = coefficient_upper.item(0)
-    b2 = coefficient_upper.item(1)
-    c2 = coefficient_upper.item(2)
-    d2 = coefficient_upper.item(3)
-    eq1 = str(a1) + "+" + str(b1) + "*u+" + str(c1) + "*u**2+" + str(d1) + "*u**3"
-    eq2 = str(a2) + "+" + str(b2) + "*u+" + str(c2) + "*u**2+" + str(d2) + "*u**3"
-    bpy.ops.mesh.primitive_xyz_function_surface(x_eq="v", y_eq="u", z_eq=eq1, range_u_min=X3, range_u_max=1, range_u_step=32, wrap_u=False, range_v_max=3)
-    bpy.ops.mesh.primitive_xyz_function_surface(x_eq="v", y_eq="u", z_eq=eq2, range_u_min=0, range_u_max=X3, range_u_step=32, wrap_u=False, range_v_max=3)
+    z_equation = ""
+    for i in range(1,n+1):
+        z_equation = z_equation + str(coefficient.item(i-1)) + "*u**"+str(i)
+        if(i != n):
+            z_equation = z_equation + "+"
+    bpy.ops.mesh.primitive_xyz_function_surface(x_eq="v", y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_max=3, close_v=True)
     
-    a3 = coefficient_lower.item(0)
-    b3 = coefficient_lower.item(1)
-    c3 = coefficient_lower.item(2)
-    d3 = coefficient_lower.item(3)
-    a4 = coefficient_lower.item(4)
-    b4 = coefficient_lower.item(5)
-    c4 = coefficient_lower.item(6)
-    d4 = coefficient_lower.item(7)
-    a5 = coefficient_lower.item(8)
-    b5 = coefficient_lower.item(9)
-    c5 = coefficient_lower.item(10)
-    d5 = coefficient_lower.item(11)
-    eq3 = str(a3) + "+" + str(b3) + "*u+" + str(c3) + "*u**2+" + str(d3) + "*u**3"
-    eq4 = str(a4) + "+" + str(b4) + "*u+" + str(c4) + "*u**2+" + str(d4) + "*u**3"
-    eq5 = str(a5) + "+" + str(b5) + "*u+" + str(c5) + "*u**2+" + str(d5) + "*u**3"
-
-    bpy.ops.mesh.primitive_xyz_function_surface(x_eq="v", y_eq="u", z_eq=eq3, range_u_min=X1, range_u_max=1, range_u_step=32, wrap_u=False, range_v_max=3)
-    bpy.ops.mesh.primitive_xyz_function_surface(x_eq="v", y_eq="u", z_eq=eq4, range_u_min=X2, range_u_max=X1, range_u_step=32, wrap_u=False, range_v_max=3)
-    bpy.ops.mesh.primitive_xyz_function_surface(x_eq="v", y_eq="u", z_eq=eq5, range_u_min=0, range_u_max=X2, range_u_step=32, wrap_u=False, range_v_max=3)
     
 #
 #    User interface
@@ -359,3 +123,4 @@ def unregister():
  
 if __name__ == "__main__":
     register()
+
