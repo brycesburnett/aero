@@ -1,35 +1,26 @@
 import bpy, math
 import numpy as np
 
-def addWing(X1,X2,X3,Y1,Y2,Y3):
+def addWing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length):
 
-    delta = 0.05 #shifts initial max thickness aft
+    #Constants
     PIRAD = 3.14159
     TWOPI = 2 * PIRAD
     RqD = PIRAD / 180
 
-    Np = 6 #number of points
-    tau_S = np.array(np.zeros(Np)) #plus one because 1 to n is preferred
+    tau_points = tau_points.split(',') #Since inputs from Blender are a string, this splits the string on commas and makes a list
+    zeta_points = zeta_points.split(',')
+    Np = len(zeta_points) #Number of points
+    tau_S = np.array(np.zeros(Np))
     zet_S = np.array(np.zeros(Np))
     chi_S = np.array(np.zeros(Np))
 
-    #these points are USER INPUTS
-    tau_S[0] = 0.00
-    tau_S[1] = 0.03
-    tau_S[2] = 0.19
-    tau_S[3] = 0.50
-    tau_S[4] = 0.88
-    tau_S[5] = 1.00
+    #Fills the numpy arrays with the list values
+    for i in range(0, len(tau_points)):
+        tau_S[i] = tau_points[i]
+        zet_S[i] = zeta_points[i]
 
-    zet_S[0] = 0.00
-    zet_S[1] = 0.0007
-    zet_S[2] = -0.049
-    zet_S[3] = 0.00
-    zet_S[4] = 0.0488
-    zet_S[5] = 0.00
-
-    #call tau_chi
-
+    #Executes code from the tau_chi function
     for i in range(0, Np):
         chi_S[i] = 1 - (1 - delta) * math.sin(PIRAD * tau_S[i])
 
@@ -40,19 +31,19 @@ def addWing(X1,X2,X3,Y1,Y2,Y3):
     Y = np.array(np.zeros(Np))
 
     for i in range(0,Np):
-        X[i] = tau_S[i]
+        X[i] = tau_S[i] #Probably didn't need to make a new array for these, just following the VB code
         Y[i] = zet_S[i]
 
-    #call polynomial
+    #Executes code from the polyomial function
     Xo = X[0]
     Yo = Y[0]
     Xn = X[n]
     Yn = Y[n]
 
-    A = np.matrix(np.zeros((n,n)))
+    A = np.matrix(np.zeros((n,n))) #Creates the arrays to solve the matrices
     B = np.matrix(np.zeros((n,1)))
 
-    for i in range(0, n):
+    for i in range(0, n): #The following code influences the matrices so that they can be solved for the equations
         if(Left_to_Right == 1):
             B[i] = Y[i+1] - Yo
         else:
@@ -63,18 +54,24 @@ def addWing(X1,X2,X3,Y1,Y2,Y3):
             else:
                 A[i,j] = (X[n] - Xn) ** (j+1)
 
-    #call gauss and solve
+    coefficient = np.linalg.solve(A,B) #Executes code from the gauss and solve functions
 
-    coefficient = np.linalg.solve(A,B)
-    y_equation = "1-(1-"+str(delta)+")*sin(pi*u)+"+str(delta)+"*sin(3*pi*u)"
-
-    z_equation = ""
+    #The following code turns the coefficient results into strings that can be used by Blender to generate the object.
+    #There are three equations, Chi is the y axis, Zeta is the z axis, and x has its own equation that makes each cross section smaller.
+    #This code makes a cross section along the y and z axis, for fuselage you'd probably want a cross section along different axes.
+    x_equation = "v-" + str(wing_length)
+    y_equation = "("+chi_eq.replace("delta", str(delta))
+    y_equation = y_equation + ")*" + str(washout) + "*v-" + str(washout_displacement) + "*v"
+    z_equation = "("
     for i in range(1,n+1):
         z_equation = z_equation + str(coefficient.item(i-1)) + "*u**"+str(i)
         if(i != n):
             z_equation = z_equation + "+"
-    bpy.ops.mesh.primitive_xyz_function_surface(x_eq="v", y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_max=3, close_v=True)
-    
+        else:
+            z_equation = z_equation + ")*" + str(washout) + "*v"
+
+    #This line actually creates the object
+    bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
     
 #
 #    User interface
@@ -89,16 +86,16 @@ class MESH_OT_primitive_wing_add(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
  
     #Input variables go here
-    X1 = FloatProperty(name="X1", default=0.92455)
-    X2 = FloatProperty(name="X2", default=0.514817)
-    X3 = FloatProperty(name="X3", default=0.69552)
-    Y1 = FloatProperty(name="Y1", default=0.0007)
-    Y2 = FloatProperty(name="Y2", default=-0.049)
-    Y3 = FloatProperty(name="Y3", default=0.0488)
+    delta = FloatProperty(name="Delta", default=0.05)
+    chi_eq = StringProperty(name="Chi Parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
+    tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
+    zeta_points = StringProperty(name="Zeta points", description="User input points", default="0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00")
+    washout = FloatProperty(name="Washout", default = 0.4)
+    washout_displacement = FloatProperty(name="Washout Displacement", default = 0.2)
+    wing_length = FloatProperty(name="Adjust wing length", default =6.0, min = 3.00)
     
- 
     def execute(self, context):
-        ob = addWing(self.X1,self.X2,self.X3,self.Y1,self.Y2,self.Y3)
+        ob = addWing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length)
         #context.scene.objects.link(ob)
         #context.scene.objects.active = ob
         return {'FINISHED'}
@@ -106,7 +103,7 @@ class MESH_OT_primitive_wing_add(bpy.types.Operator):
 #
 #    Registration
 #    Makes it possible to access the script from the Add > Mesh menu
-#
+#    Right now this is just a script, later on we will convert it into an addon
  
 def menu_func(self, context):
     self.layout.operator("mesh.primitive_wing_add", 
