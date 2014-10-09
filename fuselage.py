@@ -1,7 +1,7 @@
 import bpy, math
 import numpy as np
 
-def addWing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length):
+def addFuselage(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length):
 
     #Constants
     PIRAD = 3.14159
@@ -79,23 +79,23 @@ def addWing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacemen
  
 from bpy.props import *
  
-class MESH_OT_primitive_wing_add(bpy.types.Operator):
-    '''Add a wing'''
-    bl_idname = "mesh.primitive_wing_add"
-    bl_label = "Add wing"
+class MESH_OT_primitive_fuselage_add(bpy.types.Operator):
+    '''Add a fuselage'''
+    bl_idname = "mesh.primitive_fuselage_add"
+    bl_label = "Add fuselage"
     bl_options = {'REGISTER', 'UNDO'}
  
     #Input variables go here
     delta = FloatProperty(name="Delta", default=0.05)
     chi_eq = StringProperty(name="Chi Parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
-    tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
+    tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.09, 0.05, 0.08, 1.00")
     zeta_points = StringProperty(name="Zeta points", description="User input points", default="0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00")
     washout = FloatProperty(name="Washout", default = 0.4)
     washout_displacement = FloatProperty(name="Washout Displacement", default = 0.2)
-    wing_length = FloatProperty(name="Adjust wing length", default =6.0, min = 3.00)
+    wing_length = FloatProperty(name="Adjust fuselage length", default =6.0, min = 3.00)
     
     def execute(self, context):
-        ob = addWing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length)
+        ob = addFuselage(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length)
         #context.scene.objects.link(ob)
         #context.scene.objects.active = ob
         return {'FINISHED'}
@@ -106,8 +106,8 @@ class MESH_OT_primitive_wing_add(bpy.types.Operator):
 #    Right now this is just a script, later on we will convert it into an addon
  
 def menu_func(self, context):
-    self.layout.operator("mesh.primitive_wing_add", 
-        text="Wing", 
+    self.layout.operator("mesh.primitive_fuselage_add", 
+        text="Fuselage", 
         icon='MESH_TORUS')
  
 def register():
