@@ -92,10 +92,10 @@ class MESH_OT_primitive_fuselage_add(bpy.types.Operator):
     zeta_points = StringProperty(name="Zeta points", description="User input points", default="0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00")
     washout = FloatProperty(name="Washout", default = 0.4)
     washout_displacement = FloatProperty(name="Washout Displacement", default = 0.2)
-    wing_length = FloatProperty(name="Adjust fuselage length", default =6.0, min = 3.00)
+    fuselage_length = FloatProperty(name="Adjust fuselage length", default =6.0, min = 3.00)
     
     def execute(self, context):
-        ob = addFuselage(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length)
+        ob = addFuselage(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.fuselage_length)
         #context.scene.objects.link(ob)
         #context.scene.objects.active = ob
         return {'FINISHED'}
