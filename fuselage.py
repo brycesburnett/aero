@@ -1,7 +1,7 @@
 import bpy, math
 import numpy as np
 
-def addFuselage(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length):
+def addFuselage(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, fuselage_length):
 
     #Constants
     PIRAD = 3.14159
@@ -59,7 +59,7 @@ def addFuselage(delta, chi_eq, tau_points, zeta_points, washout, washout_displac
     #The following code turns the coefficient results into strings that can be used by Blender to generate the object.
     #There are three equations, Chi is the y axis, Zeta is the z axis, and x has its own equation that makes each cross section smaller.
     #This code makes a cross section along the y and z axis, for fuselage you'd probably want a cross section along different axes.
-    x_equation = "v-" + str(wing_length)
+    x_equation = "v-" + str(fuselage_length)
     y_equation = "("+chi_eq.replace("delta", str(delta))
     y_equation = y_equation + ")*" + str(washout) + "*v-" + str(washout_displacement) + "*v"
     z_equation = "("
@@ -71,7 +71,7 @@ def addFuselage(delta, chi_eq, tau_points, zeta_points, washout, washout_displac
             z_equation = z_equation + ")*" + str(washout) + "*v"
 
     #This line actually creates the object
-    bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
+    bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=fuselage_length, close_v=True)
     
 #
 #    User interface
