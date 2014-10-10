@@ -72,7 +72,7 @@ def addWing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacemen
 
     #This line actually creates the object
     bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
-    bpy.ops.mesh.primitive_xyz_function_surface(x_eq="-"+x_equation+"+"+str(wing_displacement), y_eq=y_equation, z_eq="-"+z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
+    bpy.ops.mesh.primitive_xyz_function_surface(x_eq="-"+x_equation+"+"+str(wing_displacement), y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
     
 #    User interface
 #
@@ -93,7 +93,7 @@ class MESH_OT_primitive_wing_add(bpy.types.Operator):
     washout = FloatProperty(name="Washout", default = 0.4)
     washout_displacement = FloatProperty(name="Washout Displacement", default = 0.2)
     wing_length = FloatProperty(name="Adjust wing length", default =6.0, min = 3.00)
-    wing_displacement = FloatProperty(name="Adjust wing displacement", default = 13.00, min =0.00)
+    wing_displacement = FloatProperty(name="Adjust wing displacement", default = 12.00, min =0.00)
     
     def execute(self, context):
         ob = addWing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.wing_displacement)
