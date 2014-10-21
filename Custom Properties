@@ -1,0 +1,48 @@
+#dynamic custom properties
+import bpy #needed in a script-text-window!
+def fget(self):                                 # custom get function
+    """Distance from origin"""                  # description of property
+    loc = self.location                         # location of object
+    distance = loc.length                       # distance from origin
+    return distance                             # return value
+ 
+def fset(self, value):                          # custom set function
+    if self.location.length < 1E-6:             # if object is at origin
+        self.location = [1, 0, 0]               # direction to move in
+    self.location.length = value                # set distance from origin
+
+ob = bpy.context.active_object                  # get the active object
+bpy.types.Object.distance = property(fget, fset)# assign function to property
+
+ob.distance = 2                                 # set the distance  
+print(ob.distance)                              # print distance to the console
+
+class XPanel(bpy.types.Panel):                 # panel to display new property
+    bl_space_type = "VIEW_3D"                   # show up in: 3d-window
+    bl_region_type = "UI"                       # show up in: properties panel
+    bl_label = "XPanel"                       # name of the new panel
+ 
+    def draw(self, context):
+        # display "distance" of the active object
+        self.layout.label(text=str(bpy.context.active_object.distance))
+ 
+bpy.utils.register_class(XPanel)               # register panel
+
+
+#static custom properties
+ob = bpy.context.active_object      # get the active object
+bpy.types.Object.xaxis = bpy.props.FloatProperty()     # add a new float property, called "xaxis"
+ob.xaxis = 1.0                      # assign a value to the property
+#print("foo:", ob.foo)               # prints "foo: bar"
+#print("foo:", ob['foo'])            # also prints "foo: bar"
+
+class XPanel(bpy.types.Panel):     # panel to display new property
+    bl_space_type = "VIEW_3D"       # show up in: 3d-window
+    bl_region_type = "UI"           # show up in: properties panel
+    bl_label = "XAxis Panel"           # name of the new panel
+ 
+    def draw(self, context):
+        # display value of "foo", of the active object
+        self.layout.prop(bpy.context.active_object, "xaxis")
+        
+bpy.utils.register_class(XPanel)   # register panel
