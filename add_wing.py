@@ -109,7 +109,40 @@ class MESH_OT_primitive_wing_add(bpy.types.Operator):
         #context.scene.objects.link(ob)
         #context.scene.objects.active = ob
         return {'FINISHED'}
- 
+
+
+#This will create the Table for XYZ values
+
+from bpy.props import IntProperty, CollectionProperty
+from bpy.types import Panel, UIList
+
+class OBJECT_UL_zones(UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        split = layout.split(0.2)
+        split.label(str(item.id))
+        split.prop(item, "name", text="", emboss=False, translate=False, icon='BORDER_RECT')
+
+
+class UIListPanelExample(Panel):
+    """Creates a Panel in the Object properties window"""
+    bl_label = "Data Table"
+    bl_idname = "OBJECT_PT_ui_list_example"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "object"
+
+    def draw(self, context):
+        layout = self.layout
+        ob = context.object
+
+        layout.template_list("OBJECT_UL_zones", "", ob, "zones", ob, "zones_index")
+
+
+class Zone(bpy.types.PropertyGroup):
+    # name = StringProperty()
+    id = IntProperty()
+
+
 #
 #    Registration
 #    Makes it possible to access the script from the Add > Mesh menu
@@ -123,7 +156,12 @@ def menu_func(self, context):
 def register():
    bpy.utils.register_module(__name__)
    bpy.types.INFO_MT_mesh_add.prepend(menu_func)
+   #added for table
+   bpy.types.Object.zones = CollectionProperty(type=Zone)
+   bpy.types.Object.zones_index = IntProperty()
  
 def unregister():
     bpy.utils.unregister_module(__name__)
     bpy.types.INFO_MT_mesh_add.remove(menu_func)
+    #added for table
+    del bpy.types.Object.zones
