@@ -111,18 +111,6 @@ class MESH_OT_primitive_wing_add(bpy.types.Operator):
         return {'FINISHED'}
 
 
-#This will create the Table for XYZ values
-
-from bpy.props import IntProperty, CollectionProperty
-from bpy.types import Panel, UIList
-
-class OBJECT_UL_zones(UIList):
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        split = layout.split(0.2)
-        split.label(str(item.id))
-        split.prop(item, "name", text="", emboss=False, translate=False, icon='BORDER_RECT')
-
-
 class WingList(bpy.types.UIList):
     def draw_item (self, context, layout, data, item, icon, active_data,active_propname):
         
