@@ -123,24 +123,34 @@ class OBJECT_UL_zones(UIList):
         split.prop(item, "name", text="", emboss=False, translate=False, icon='BORDER_RECT')
 
 
-class UIListPanelExample(Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "Data Table"
-    bl_idname = "OBJECT_PT_ui_list_example"
-    bl_space_type = 'PROPERTIES'
-    bl_region_type = 'WINDOW'
+class WingList(bpy.types.UIList):
+    def draw_item (self, context, layout, data, item, icon, active_data,active_propname):
+        
+       #check which type of primitive, separate draw for each
+        
+        if item.data == None:
+            layout.label("Uninitialized object")
+        else:
+            layout.label(item.data.name)
+            
+#line
+class ListGui( bpy.types.Panel):
+    bl_idname = "Graph_properties"
+    bl_label = "Graph Properties"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
     bl_context = "object"
-
+    
     def draw(self, context):
-        layout = self.layout
-        ob = context.object
-
-        layout.template_list("OBJECT_UL_zones", "", ob, "zones", ob, "zones_index")
-
-
-class Zone(bpy.types.PropertyGroup):
-    # name = StringProperty()
-    id = IntProperty()
+        layout= self.layout
+        
+        layout.label("Properties")
+        row = layout.row()
+        row.alignment = 'EXPAND'
+        row.label("X")
+        row.label("Y")
+        row.label("Z")
+        row.label("Time")
 
 
 #
