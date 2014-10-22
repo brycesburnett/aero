@@ -152,12 +152,6 @@ class ListGui( bpy.types.Panel):
         row.label("Z")
         row.label("Time")
 
-
-#
-#    Registration
-#    Makes it possible to access the script from the Add > Mesh menu
-#    Right now this is just a script, later on we will convert it into an addon
- 
 def menu_func(self, context):
     self.layout.operator("mesh.primitive_wing_add", 
         text="Wing", 
