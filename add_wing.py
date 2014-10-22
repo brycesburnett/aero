@@ -109,38 +109,6 @@ class MESH_OT_primitive_wing_add(bpy.types.Operator):
         #context.scene.objects.link(ob)
         #context.scene.objects.active = ob
         return {'FINISHED'}
-
-
-class WingList(bpy.types.UIList):
-    def draw_item (self, context, layout, data, item, icon, active_data,active_propname):
-        
-       #check which type of primitive, separate draw for each
-        
-        if item.data == None:
-            layout.label("Uninitialized object")
-        else:
-            layout.label(item.data.name)
-            
-#line
-class ListGui( bpy.types.Panel):
-    bl_idname = "Graph_properties"
-    bl_label = "Graph Properties"
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_context = "object"
-    
-    def draw(self, context):
-        layout= self.layout
-        
-        layout.label("Properties")
-        row = layout.row()
-        row.alignment = 'EXPAND'
-        row.label("X")
-        row.label("Y")
-        row.label("Z")
-        row.label("Time")
-
-
 #
 #    Registration
 #    Makes it possible to access the script from the Add > Mesh menu
