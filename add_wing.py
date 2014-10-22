@@ -109,10 +109,24 @@ class MESH_OT_primitive_wing_add(bpy.types.Operator):
         #context.scene.objects.link(ob)
         #context.scene.objects.active = ob
         return {'FINISHED'}
-        
+
+
+#This will create the Table for XYZ values
+
+from bpy.props import IntProperty, CollectionProperty
+from bpy.types import Panel, UIList
+
+class OBJECT_UL_zones(UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        split = layout.split(0.2)
+        split.label(str(item.id))
+        split.prop(item, "name", text="", emboss=False, translate=False, icon='BORDER_RECT')
+
+
 class WingList(bpy.types.UIList):
     def draw_item (self, context, layout, data, item, icon, active_data,active_propname):
-        #check which type of primitive, separate draw for each
+        
+       #check which type of primitive, separate draw for each
         
         if item.data == None:
             layout.label("Uninitialized object")
@@ -137,7 +151,8 @@ class ListGui( bpy.types.Panel):
         row.label("Y")
         row.label("Z")
         row.label("Time")
-        
+
+
 #
 #    Registration
 #    Makes it possible to access the script from the Add > Mesh menu
@@ -160,12 +175,3 @@ def unregister():
     bpy.types.INFO_MT_mesh_add.remove(menu_func)
     #added for table
     del bpy.types.Object.zones
-
-#
-#	Registration
-#   All panels and operators must be registered with Blender; otherwise
-#   they do not show up. The simplest way to register everything in the
-#   file is with a call to bpy.utils.register_module(__name__).
-#
- 
-bpy.utils.register_module(__name__)
