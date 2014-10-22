@@ -152,8 +152,8 @@ def register():
    bpy.utils.register_module(__name__)
    bpy.types.INFO_MT_mesh_add.prepend(menu_func)
    #added for table
-   bpy.types.Object.zones = CollectionProperty(type=Zone)
-   bpy.types.Object.zones_index = IntProperty()
+   #bpy.types.Object.zones = CollectionProperty(type=Zone)
+   #bpy.types.Object.zones_index = IntProperty()
  
 def unregister():
     bpy.utils.unregister_module(__name__)
