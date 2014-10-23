@@ -134,9 +134,9 @@ def add_fuselage(delta, chi_eq, tau_points, zeta_points, smoothness):
     bpy.ops.mesh.spin(steps=int(smoothness), angle=6.28319, center=(0, 0, 0), axis=(0, 1, 0))
     bpy.ops.mesh.remove_doubles()
     bpy.ops.object.mode_set(mode='OBJECT')
-    bpy.context.object.scale[0] = 3.0
-    bpy.context.object.scale[1] = 3.0
-    bpy.context.object.scale[2] = 3.0
+    bpy.context.object.scale[0] = 7.0
+    bpy.context.object.scale[1] = 7.0
+    bpy.context.object.scale[2] = 7.0
 
 #    User interface
 #
