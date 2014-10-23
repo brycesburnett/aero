@@ -1,6 +1,6 @@
 #This code is needed for an addon as well as deleting the if __name__ statement at the bottom.
 bl_info = {
-    "name": "Add Wing",
+    "name": "Add Symmetrical Wings",
 	"author": "CSULB CECS 491 Team 4",
 	"version": (1, 0),
 	"description": "Generates two symmetrical wings using parametric cubic splines.",
@@ -10,7 +10,7 @@ bl_info = {
 import bpy, math
 import numpy as np
 
-def addWing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, wing_displacement):
+def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, wing_displacement):
 
     #Constants
     PIRAD = 3.14159
@@ -69,7 +69,7 @@ def addWing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacemen
     #There are three equations, Chi is the y axis, Zeta is the z axis, and x has its own equation that makes each cross section smaller.
     #This code makes a cross section along the y and z axis, for fuselage you'd probably want a cross section along different axes.
     x_equation = "v-" + str(wing_length)
-    y_equation = "("+chi_eq.replace("delta", str(delta))
+    y_equation = "(" + chi_eq.replace("delta", str(delta))
     y_equation = y_equation + ")*" + str(washout) + "*v-" + str(washout_displacement) + "*v"
     z_equation = "("
     for i in range(1,n+1):
@@ -88,10 +88,10 @@ def addWing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacemen
  
 from bpy.props import *
  
-class MESH_OT_primitive_wing_add(bpy.types.Operator):
-    '''Add a wing'''
-    bl_idname = "mesh.primitive_wing_add"
-    bl_label = "Add wing"
+class AddSymmetricalWings(bpy.types.Operator):
+    '''Symmetrical wing generator'''
+    bl_idname = "mesh.symmetrical_wings_add"
+    bl_label = "Add symmetrical wings"
     bl_options = {'REGISTER', 'UNDO'}
  
     #Input variables go here
@@ -105,67 +105,24 @@ class MESH_OT_primitive_wing_add(bpy.types.Operator):
     wing_displacement = FloatProperty(name="Adjust wing displacement", default = 12.00, min =0.00)
     
     def execute(self, context):
-        ob = addWing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.wing_displacement)
+        ob = add_wings(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.wing_displacement)
         #context.scene.objects.link(ob)
         #context.scene.objects.active = ob
         return {'FINISHED'}
-
-
-#This will create the Table for XYZ values
-
-from bpy.props import IntProperty, CollectionProperty
-from bpy.types import Panel, UIList
-
-class OBJECT_UL_zones(UIList):
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        split = layout.split(0.2)
-        split.label(str(item.id))
-        split.prop(item, "name", text="", emboss=False, translate=False, icon='BORDER_RECT')
-
-
-class WingList(bpy.types.UIList):
-    def draw_item (self, context, layout, data, item, icon, active_data,active_propname):
-        
-       #check which type of primitive, separate draw for each
-        
-        if item.data == None:
-            layout.label("Uninitialized object")
-        else:
-            layout.label(item.data.name)
-            
-#line
-class ListGui( bpy.types.Panel):
-    bl_idname = "Graph_properties"
-    bl_label = "Graph Properties"
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_context = "object"
-    
-    def draw(self, context):
-        layout= self.layout
-        
-        layout.label("Properties")
-        row = layout.row()
-        row.alignment = 'EXPAND'
-        row.label("X")
-        row.label("Y")
-        row.label("Z")
-        row.label("Time")
-
+ 
+#
+#    Registration
+#    Makes it possible to access the script from the Add > Mesh menu
+#    Right now this is just a script, later on we will convert it into an addon
+ 
 def menu_func(self, context):
-    self.layout.operator("mesh.primitive_wing_add", 
-        text="Wing", 
-        icon='MESH_TORUS')
+    self.layout.operator("mesh.symmetrical_wings_add", 
+        text="Symmetrical Wings")
  
 def register():
    bpy.utils.register_module(__name__)
    bpy.types.INFO_MT_mesh_add.prepend(menu_func)
-   #added for table
-   #bpy.types.Object.zones = CollectionProperty(type=Zone)
-   #bpy.types.Object.zones_index = IntProperty()
  
 def unregister():
     bpy.utils.unregister_module(__name__)
     bpy.types.INFO_MT_mesh_add.remove(menu_func)
-    #added for table
-    del bpy.types.Object.zones
