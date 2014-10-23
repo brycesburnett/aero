@@ -45,7 +45,7 @@ def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacem
 
     #try to get points from excel sheet
     try:
-    	tau_pointsExcel = getTauPoints()
+        tau_pointsExcel = getTauPoints()
         zeta_pointsExcel = getZetaPoints()
         #split these points with , as delimiter
         tau_pointsExcel = tau_pointsExcel.split(',')
@@ -138,7 +138,7 @@ def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacem
  
 from bpy.props import *
  
-class AddSymmetricalWings(bpy.types.Operator):
+class SymmetricalWings(bpy.types.Operator):
     '''Symmetrical wing generator'''
     bl_idname = "mesh.symmetrical_wings_add"
     bl_label = "Add symmetrical wings"

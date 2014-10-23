@@ -1,9 +1,9 @@
 #This code is needed for an addon as well as deleting the if __name__ statement at the bottom.
 bl_info = {
-    "name": "Add Fuselage",
+    "name": "Add Wing",
 	"author": "CSULB CECS 491 Team 4",
 	"version": (1, 0),
-	"description": "Generates a fuselage with parametric cubic splines.",
+	"description": "Generates a single wing using parametric cubic splines.",
 	"category": "Object"
 }
 
@@ -36,7 +36,7 @@ def getZetaPoints():
     return zetaString;
     
 
-def add_fuselage(delta, chi_eq, tau_points, zeta_points, smoothness):
+def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length):
 
     #Constants
     PIRAD = 3.14159
@@ -78,7 +78,7 @@ def add_fuselage(delta, chi_eq, tau_points, zeta_points, smoothness):
             #using default points if theres a problem with excel points
             tau_S[i] = tau_points[i]
             zet_S[i] = zeta_points[i]
-
+            
     #Executes code from the tau_chi function
     for i in range(0, Np):
         chi_S[i] = 1 - (1 - delta) * math.sin(PIRAD * tau_S[i])
@@ -118,46 +118,43 @@ def add_fuselage(delta, chi_eq, tau_points, zeta_points, smoothness):
     #The following code turns the coefficient results into strings that can be used by Blender to generate the object.
     #There are three equations, Chi is the y axis, Zeta is the z axis, and x has its own equation that makes each cross section smaller.
     #This code makes a cross section along the y and z axis, for fuselage you'd probably want a cross section along different axes.
-    x_equation = "0"
-    y_equation = chi_eq.replace("delta", str(delta))
+    x_equation = "v-" + str(wing_length)
+    y_equation = "(" + chi_eq.replace("delta", str(delta))
+    y_equation = y_equation + ")*" + str(washout) + "*v-" + str(washout_displacement) + "*v"
     z_equation = "("
     for i in range(1,n+1):
         z_equation = z_equation + str(coefficient.item(i-1)) + "*u**"+str(i)
         if(i != n):
             z_equation = z_equation + "+"
         else:
-            z_equation = z_equation + ")"
-	
+            z_equation = z_equation + ")*" + str(washout) + "*v"
+
     #This line actually creates the object
-    bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=False, range_v_min=0, range_v_max=3, close_v=True)
-    bpy.ops.object.mode_set(mode='EDIT')
-    bpy.ops.mesh.spin(steps=int(smoothness), angle=6.28319, center=(0, 0, 0), axis=(0, 1, 0))
-    bpy.ops.mesh.remove_doubles()
-    bpy.ops.object.mode_set(mode='OBJECT')
-    bpy.context.object.scale[0] = 3.0
-    bpy.context.object.scale[1] = 3.0
-    bpy.context.object.scale[2] = 3.0
+    bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
+    bpy.context.object.rotation_euler[1] = 1.5708
 
 #    User interface
 #
  
 from bpy.props import *
  
-class Fuselage(bpy.types.Operator):
-    '''Fuselage generator'''
-    bl_idname = "mesh.fuselage_add"
-    bl_label = "Add a fuselage"
+class Wing(bpy.types.Operator):
+    '''Single Wing generator'''
+    bl_idname = "mesh.wing_add"
+    bl_label = "Add a wing"
     bl_options = {'REGISTER', 'UNDO'}
  
     #Input variables go here
     delta = FloatProperty(name="Delta", default=0.05)
     chi_eq = StringProperty(name="Chi Parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
-    tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.15, 0.23, 0.35, 0.5, 0.65, 0.77, 0.85, 1.0")
-    zeta_points = StringProperty(name="Zeta points", description="User input points", default="-0.005, -0.03, -0.045, -0.045, 0.0, 0.04, 0.04, 0.02, 0.005")
-    smoothness = StringProperty(name="Smoothness", description="Smoothness of the fuselage", default = "32")
+    tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
+    zeta_points = StringProperty(name="Zeta points", description="User input points", default="0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00")
+    washout = FloatProperty(name="Washout", default = 0.37)
+    washout_displacement = FloatProperty(name="Washout Displacement", default = 0.65)
+    wing_length = FloatProperty(name="Adjust wing length", default =6.0, min = 3.00)
     
     def execute(self, context):
-        ob = add_fuselage(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness)
+        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length)
         #context.scene.objects.link(ob)
         #context.scene.objects.active = ob
         return {'FINISHED'}
@@ -168,8 +165,8 @@ class Fuselage(bpy.types.Operator):
 #    Right now this is just a script, later on we will convert it into an addon
  
 def menu_func(self, context):
-    self.layout.operator("mesh.fuselage_add", 
-        text="Fuselage")
+    self.layout.operator("mesh.wing_add", 
+        text="Wing")
  
 def register():
    bpy.utils.register_module(__name__)
