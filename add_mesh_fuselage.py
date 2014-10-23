@@ -151,7 +151,7 @@ class Fuselage(bpy.types.Operator):
  
     #Input variables go here
     delta = FloatProperty(name="Delta", default=0.05)
-    chi_eq = StringProperty(name="Chi Parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
+    chi_eq = StringProperty(name="Chi parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
     tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.15, 0.23, 0.35, 0.5, 0.65, 0.77, 0.85, 1.0")
     zeta_points = StringProperty(name="Zeta points", description="User input points", default="-0.005, -0.03, -0.045, -0.045, 0.0, 0.04, 0.04, 0.02, 0.005")
     smoothness = StringProperty(name="Smoothness", description="Smoothness of the fuselage", default = "32")
