@@ -9,6 +9,32 @@ bl_info = {
 
 import bpy, math
 import numpy as np
+import xlrd
+#location of points excel sheet
+file_location = "C:/points.xlsx"
+
+def getTauPoints():
+    workbook = xlrd.open_workbook(file_location)
+    sheet = workbook.sheet_by_index(0)
+    tauString = ""
+    for i in range(1,7):
+        if i == 6:
+            tauString += str(sheet.cell_value(i,0))
+        else:
+            tauString += str(sheet.cell_value(i,0))+','
+    return tauString;
+
+def getZetaPoints():
+    workbook = xlrd.open_workbook(file_location)
+    sheet = workbook.sheet_by_index(0)
+    zetaString =""
+    for i in range(1,7):
+        if i == 6:
+            zetaString += str(sheet.cell_value(i,1))
+        else:
+            zetaString += str(sheet.cell_value(i,1))+','
+    return zetaString;
+    
 
 def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, wing_displacement):
 
@@ -17,17 +43,41 @@ def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacem
     TWOPI = 2 * PIRAD
     RqD = PIRAD / 180
 
-    tau_points = tau_points.split(',') #Since inputs from Blender are a string, this splits the string on commas and makes a list
+    #try to get points from excel sheet
+    try:
+    	tau_pointsExcel = getTauPoints()
+        zeta_pointsExcel = getZetaPoints()
+        #split these points with , as delimiter
+        tau_pointsExcel = tau_pointsExcel.split(',')
+        zeta_pointsExcel = zeta_pointsExcel.split(',')
+        #doesnt mean points are correct data type though
+    except:
+        #error finding excel file
+        #so tau/zeta points arent reassigned
+        pass
+    #Since inputs from Blender are a string, this splits the string on commas and makes a list
+    tau_points = tau_points.split(',') 
     zeta_points = zeta_points.split(',')
+
     Np = len(zeta_points) #Number of points
     tau_S = np.array(np.zeros(Np))
     zet_S = np.array(np.zeros(Np))
     chi_S = np.array(np.zeros(Np))
 
     #Fills the numpy arrays with the list values
-    for i in range(0, len(tau_points)):
-        tau_S[i] = tau_points[i]
-        zet_S[i] = zeta_points[i]
+    
+    try:
+        for i in range(0, len(tau_pointsExcel)):
+            #using excel points
+            #there could still be an error with the data type of the value so check the array of points from excel
+            tau_S[i] = tau_pointsExcel[i]
+            zet_S[i] = zeta_pointsExcel[i]
+    except:
+    	#error found in excel points, revert to original
+        for i in range(0, len(tau_points)):
+            #using default points if theres a problem with excel points
+            tau_S[i] = tau_points[i]
+            zet_S[i] = zeta_points[i]
 
     #Executes code from the tau_chi function
     for i in range(0, Np):
