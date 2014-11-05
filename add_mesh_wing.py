@@ -36,7 +36,7 @@ def getZetaPoints():
     return zetaString;
     
 
-def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length):
+def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, x_location):
 
     #Constants
     PIRAD = 3.14159
@@ -132,6 +132,9 @@ def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displaceme
     #This line actually creates the object
     bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
     bpy.context.object.rotation_euler[1] = 1.5708
+    bpy.context.space_data.cursor_location[0] = x_location
+    bpy.context.object.location[0] = x_location
+
 
 #    User interface
 #
@@ -152,9 +155,10 @@ class Wing(bpy.types.Operator):
     washout = FloatProperty(name="Washout", default = 0.16)
     washout_displacement = FloatProperty(name="Washout Displacement", default = 0.65)
     wing_length = FloatProperty(name="Adjust wing length", default =3.5, min = 3.00)
+    x_location = FloatProperty(name="X location", default = 0)
     
     def execute(self, context):
-        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length)
+        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.x_location)
         #context.scene.objects.link(ob)
         #context.scene.objects.active = ob
         return {'FINISHED'}
