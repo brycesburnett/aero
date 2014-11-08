@@ -34,6 +34,7 @@ class Fuselage(bpy.types.Operator):
     station_points = StringProperty(name="Station points (x)", description="User input points (x)", default="0, 0, 0.25, 0.7, 1, 1")
     width_points = StringProperty(name="Width points (w)", description="User input points (width)", default="1, 0.005, 0.08, 0.04, 0.005, -0.5")
     upper_points = StringProperty(name="Upper points (zu)", description="User input points (z upper)", default="1, 0, 0.2, 0.19, 0.16, -0.6")
+   #snake points may not actually do anything?
     snake_points = StringProperty(name="Snake points (dyy", description="User input points (dyy)", default="1, 0, 0, 0, 0, 1")
     equator_points = StringProperty(name = "Equator points (ze)", description="User input points (z equator)", default="0, 0, 0.05, 0.15, 0.15, 1")
     lower_points = StringProperty(name = "Lower points (zL)", description="User input points (z lower)", default="1, 0, 0, 0, 0.11, 0.14, 0.4")
