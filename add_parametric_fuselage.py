@@ -23,7 +23,7 @@ def add_fuselage(delta, time_points, station_points, snake_points, width_points,
 from bpy.props import *
  
 class Fuselage(bpy.types.Operator):
-    '''Single Wing generator'''
+    '''Single Fuselage generator'''
     bl_idname = "mesh.fuselage_add"
     bl_label = "Add a fuselage"
     bl_options = {'REGISTER', 'UNDO'}
