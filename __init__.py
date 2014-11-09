@@ -34,6 +34,28 @@ class mesh_aircraft_components_add(bpy.types.Menu):
         layout.operator("mesh.pod_add", text="Pod")
         layout.operator("mesh.fuselage_add", text="Fuselage")
 
+class aircraft_component_panel(bpy.types.Panel):
+    """Aircraft Component_Panel"""
+    bl_idname = "panel_aircraft_components_add"
+    bl_label = "Aircraft Component Panel"
+    
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'TOOLS'
+    bl_category = 'Aircraft Generator'
+    
+    #Panels in ImageEditor are using .poll() instead of bl_context.
+    #@classmethod
+    #def poll(cls, context):
+    #    return context.space_data.show_paint
+    
+    def draw(self, context):
+        layout = self.layout
+        layout.operator("mesh.wing_add", text="Wing")
+        layout.operator("mesh.symmetrical_wings_add", text="Symmetrical Wing")
+        layout.operator("mesh.pod_add", text="Pod")
+        layout.operator("mesh.fuselage_add", text="Fuselage")
+
+
 def menu_func(self, context):
     self.layout.menu("mesh_aircraft_components_add", icon="PLUGIN")
 
