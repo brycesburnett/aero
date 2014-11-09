@@ -18,6 +18,10 @@ file_location = "C:/points.xlsx"
 def add_fuselage(time_points, station_points, snake_points, width_points, upper_points, equator_points, lower_points, x_location, y_location, z_location):
     #do some magic
    
+   #presumably these will be necessary to get the xyz coordinates for blender to output
+   x_equation = 
+   y_equation =
+   z_equation =
 
  
 from bpy.props import *
