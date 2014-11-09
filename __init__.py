@@ -37,7 +37,7 @@ class mesh_aircraft_components_add(bpy.types.Menu):
 class aircraft_component_panel(bpy.types.Panel):
     """Aircraft Component_Panel"""
     bl_idname = "panel_aircraft_components_add"
-    bl_label = "Aircraft Component Panel"
+    bl_label = "Aircraft Components"
     
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
