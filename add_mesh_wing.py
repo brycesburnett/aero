@@ -169,19 +169,3 @@ class Wing(bpy.types.Operator):
         #context.scene.objects.active = ob
         return {'FINISHED'}
  
-#
-#    Registration
-#    Makes it possible to access the script from the Add > Mesh menu
-#    Right now this is just a script, later on we will convert it into an addon
- 
-def menu_func(self, context):
-    self.layout.operator("mesh.wing_add", 
-        text="Wing")
- 
-def register():
-   bpy.utils.register_module(__name__)
-   bpy.types.INFO_MT_mesh_add.prepend(menu_func)
- 
-def unregister():
-    bpy.utils.unregister_module(__name__)
-    bpy.types.INFO_MT_mesh_add.remove(menu_func)
