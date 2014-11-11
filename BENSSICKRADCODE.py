@@ -56,7 +56,7 @@ def validateUserPoints(t_points, z_points):
 #index 0 = A, index 1 = B
 #if useExcelPoints is true then try to get excel points
 #else an error most likely occurred and we can bypass trying excel
-def defineMatrices(t_points, z_points, useExcelPoints):
+def defineMatrices(t_points, z_points, useExcelPoints, delta):
     if useExcelPoints:
          #try to get points from excel sheet
         try:
@@ -89,7 +89,6 @@ def defineMatrices(t_points, z_points, useExcelPoints):
     for i in range(0, len(t_points)):
         t_array[i] = t_points[i]
         z_array[i] = z_points[i]
-	delta = FloatProperty(name="Delta", default=0.05)
         c_array[i] = 1 - (1 - delta) * math.sin(PIRAD * t_array[i])
 
     Left_to_Right = 1
@@ -127,7 +126,7 @@ def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacem
     #passing in tau and zeta points, and true to check excel file
     Np = len(zeta_points)
     n = Np - 1
-    AB = defineMatrices(tau_points, zeta_points, True)
+    AB = defineMatrices(tau_points, zeta_points, True, delta)
     A = AB[0]
     B = AB[1]
     try:
