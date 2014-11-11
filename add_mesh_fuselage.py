@@ -157,7 +157,8 @@ class Fuselage(bpy.types.Operator):
     smoothness = StringProperty(name="Smoothness", description="Smoothness of the fuselage", default = "32")
     
      def execute(self, context):
+     	ob = add_fuselage(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness)
         ob = bpy.context.active_object
-        ob["component"] = "Fuselage"
+        ob["component"] = "fuselage"
         ob.name = "Fuselage"
         return {'FINISHED'}
