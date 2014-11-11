@@ -143,6 +143,13 @@ class SymmetricalWings(bpy.types.Operator):
     bl_idname = "mesh.symmetrical_wings_add"
     bl_label = "Add symmetrical wings"
     bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+       
+        ob = bpy.context.active_object
+        ob["component"] = "wing"
+        ob.name = "Symmetric Wing"
+     return {'FINISHED'}
  
     #Input variables go here
     delta = FloatProperty(name="Delta", default=0.05)
