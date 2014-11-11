@@ -157,7 +157,7 @@ class SymmetricalWings(bpy.types.Operator):
     def execute(self, context):
         ob = add_wings(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.wing_displacement)
         ob = bpy.context.active_object
-        ob["component"] = "sym wing"
-        ob.name = "Sym Wing"
+        ob["component"] = "symmetrical wings"
+        ob.name = "Symmetrical Wings"
         return {'FINISHED'}
  
