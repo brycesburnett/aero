@@ -14,25 +14,27 @@ import csv
 file_location = "C:/points.xlsx"
 
 def getTauPoints():
-    workbook = xlrd.open_workbook(file_location)
-    sheet = workbook.sheet_by_index(0)
-    tauString = ""
-    for i in range(1,7):
-        if i == 6:
-            tauString += str(sheet.cell_value(i,0))
-        else:
-            tauString += str(sheet.cell_value(i,0))+','
+    with open(file_location, 'rb') as f:
+    	mycsv = csv.reader(f)
+    	mycsv = list(mycsv)
+    	tauString = ""
+    	for i in range(1,7):
+        	if i == 6:
+            	tauString += mycsv[i][0])
+        	else:
+            	tauString += tauString += mycsv[i][0])+','
     return tauString;
 
 def getZetaPoints():
-    workbook = xlrd.open_workbook(file_location)
-    sheet = workbook.sheet_by_index(0)
-    zetaString =""
-    for i in range(1,7):
-        if i == 6:
-            zetaString += str(sheet.cell_value(i,1))
-        else:
-            zetaString += str(sheet.cell_value(i,1))+','
+    with open(file_location, 'rb') as f:
+    	mycsv = csv.reader(f)
+    	mycsv = list(mycsv)
+    	zetaString = ""
+    	for i in range(1,7):
+        	if i == 6:
+            	zetaString += mycsv[i][1])
+        	else:
+            	zetaString += zetaString += mycsv[i][1])+','
     return zetaString;
     
 
