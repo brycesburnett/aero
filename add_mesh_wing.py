@@ -132,12 +132,9 @@ def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displaceme
     #This line actually creates the object
     bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
     bpy.context.object.rotation_euler[1] = 1.5708
-    bpy.context.space_data.cursor_location[0] = x_location
     bpy.context.object.location[0] = x_location
-    bpy.context.space_data.cursor_location[0] = y_location
-    bpy.context.object.location[0] = y_location
-    bpy.context.space_data.cursor_location[0] = z_location
-    bpy.context.object.location[0] = z_location
+    bpy.context.object.location[1] = y_location
+    bpy.context.object.location[2] = z_location
 
 
 #    User interface
@@ -149,7 +146,7 @@ class Wing(bpy.types.Operator):
     '''Single Wing generator'''
     bl_idname = "mesh.wing_add"
     bl_label = "Add a wing"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER', 'PRESET'}
  
     #Input variables go here
     delta = FloatProperty(name="Delta", default=0.05)
@@ -165,7 +162,32 @@ class Wing(bpy.types.Operator):
     
     def execute(self, context):
         ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.x_location, self.y_location, self.z_location)
-        #context.scene.objects.link(ob)
-        #context.scene.objects.active = ob
+        ob = bpy.context.active_object
+        ob["component"] = "wing"
+        ob.name = "Wing"
         return {'FINISHED'}
- 
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+class updateWing(bpy.types.Operator):
+    bl_idname = "mesh.wing_update"
+    bl_label = "Update a wing"
+    bl_options = {'INTERNAL'}
+
+    #Input variables go here
+    delta = FloatProperty(name="Delta", default=0.05)
+    chi_eq = StringProperty(name="Chi parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
+    tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
+    zeta_points = StringProperty(name="Zeta points", description="User input points", default="0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00")
+    washout = FloatProperty(name="Washout", default = 0.16)
+    washout_displacement = FloatProperty(name="Washout Displacement", default = 0.65)
+    wing_length = FloatProperty(name="Adjust wing length", default =3.5, min = 3.00)
+    x_location = FloatProperty(name="X location", default = 0)
+    y_location = FloatProperty(name="Y location", default = 0)
+    z_location = FloatProperty(name="Z location", default = 0)
+
+    def invoke(self, context, event):
+        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.x_location, self.y_location, self.z_location)
+        return {'FINISHED'}
