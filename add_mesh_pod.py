@@ -146,6 +146,12 @@ class Pod(bpy.types.Operator):
     bl_idname = "mesh.pod_add"
     bl_label = "Add a pod"
     bl_options = {'REGISTER', 'UNDO'}
+    
+      def execute(self, context):
+     	ob = bpy.context.active_object
+        ob["component"] = "Pod"
+        ob.name = "Pod"
+         return {'FINISHED'}
  
     #Input variables go here
     delta = FloatProperty(name="Delta", default=0.05)
