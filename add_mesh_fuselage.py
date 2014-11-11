@@ -161,10 +161,3 @@ class Fuselage(bpy.types.Operator):
         ob["component"] = "Fuselage"
         ob.name = "Fuselage"
         return {'FINISHED'}
-    
-    def execute(self, context):
-        ob = add_fuselage(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness)
-        #context.scene.objects.link(ob)
-        #context.scene.objects.active = ob
-        return {'FINISHED'}
- 
