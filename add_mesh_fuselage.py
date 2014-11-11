@@ -156,8 +156,8 @@ class Fuselage(bpy.types.Operator):
     zeta_points = StringProperty(name="Zeta points", description="User input points", default="-0.005, -0.03, -0.045, -0.045, 0.0, 0.04, 0.04, 0.02, 0.005")
     smoothness = StringProperty(name="Smoothness", description="Smoothness of the fuselage", default = "32")
     
-     def execute(self, context):
-     	ob = add_fuselage(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness)
+    def execute(self, context):
+        ob = add_fuselage(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness)
         ob = bpy.context.active_object
         ob["component"] = "fuselage"
         ob.name = "Fuselage"
