@@ -89,6 +89,7 @@ def defineMatrices(t_points, z_points, useExcelPoints):
     for i in range(0, len(t_points)):
         t_array[i] = t_points[i]
         z_array[i] = z_points[i]
+	delta = 0.5
         c_array[i] = 1 - (1 - delta) * math.sin(PIRAD * t_array[i])
 
     Left_to_Right = 1
