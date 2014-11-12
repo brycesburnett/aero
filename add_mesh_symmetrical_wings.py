@@ -1,10 +1,10 @@
 #This code is needed for an addon as well as deleting the if __name__ statement at the bottom.
 bl_info = {
     "name": "Add Symmetrical Wings",
-	"author": "CSULB CECS 491 Team 4",
-	"version": (1, 0),
-	"description": "Generates two symmetrical wings using parametric cubic splines.",
-	"category": "Object"
+    "author": "CSULB CECS 491 Team 4",
+    "version": (1, 0),
+    "description": "Generates two symmetrical wings using parametric cubic splines.",
+    "category": "Object"
 }
 
 import bpy, math
@@ -12,6 +12,13 @@ import numpy as np
 import csv
 #location of points excel sheet
 file_location = "C:/points.csv"
+
+#constants
+PIRAD = 3.14159
+TWOPI = 2 * PIRAD
+RqD = PIRAD / 180
+TAU_DEFAULT = "0.0, 0.03, 0.19, 0.50, 0.88, 1.00"
+ZETA_DEFAULT = "0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00"
 
 def getTauPoints():
     with open(file_location, 'r') as f:
@@ -22,10 +29,11 @@ def getTauPoints():
             if i == 6:
                 tauString += mycsv[i][0]
             else:
-                tauString += mycsv[i][0]+','
+                tauString += mycsv[i][0]+', '
+        print("Tau: " + tauString)
         f.close()
     return tauString;
-    
+
 def getZetaPoints():
     with open(file_location, 'r') as f:
         mycsv = csv.reader(f)
@@ -35,56 +43,76 @@ def getZetaPoints():
             if i == 6:
                 zetaString += mycsv[i][1]
             else:
-                zetaString += mycsv[i][1]+','
+                zetaString += mycsv[i][1]+', '
+        print("Zeta: " + zetaString)
         f.close()
     return zetaString;
 
-def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, wing_displacement):
+#returns True if points are valid 
+def validateUserPoints(t_points, z_points):
+    for i in range(0, len(t_points)):
+        try:
+            numb = float(t_points[i])
+        except ValueError:
+            print("Tau point '" + t_points[i] + "'' is not a float.")
+            return False
+    for i in range(0, len(z_points)):
+        try:
+            numb = float(z_points[i])
+        except ValueError:
+            print("Zeta point '" + z_points[i] +"'' is not a float.")
+            return False
+    return True
 
-    #Constants
-    PIRAD = 3.14159
-    TWOPI = 2 * PIRAD
-    RqD = PIRAD / 180
+#pass in two strings (user input points) and boolean
+#returns an array of two matrices (A and B)
+#index 0 = A, index 1 = B
+#if useExcelPoints is true then try to get excel points
+#else an error most likely occurred and we can bypass trying excel
+def defineMatrices(delta, t_points, z_points, useExcelPoints):
+    print("")
+    if useExcelPoints:
+        #try to get points from excel sheet
+        t_pointsExc = getTauPoints()
+        z_pointsExc = getZetaPoints()
+        try:
+            #TRY because we don't know if they're valid yet
+            t_TRY = t_pointsExc.split(',')
+            z_TRY = z_pointsExc.split(',')
+            #split these points with , as delimiter if valid
+            if validateUserPoints(t_TRY, z_TRY):
+                t_points = t_TRY
+                z_points = z_TRY
+                print("Excel values imported.")
+            #else we dont bother using them
+            else:
+                print("Error with excel values.")
+                print("Using default input points...")
+                t_points = t_points.split(',')
+                z_points = z_points.split(',') 
+            
+        except:
+            #error finding excel file
+            #so tau/zeta points arent reassigned
+            print("Error with excel values or finding file.")
+            print("Using default input points...")
+            
+            pass
+    else:
+        t_points = t_points.split(',')
+        z_points = z_points.split(',')
 
-    #try to get points from excel sheet
-    try:
-        tau_pointsExcel = getTauPoints()
-        zeta_pointsExcel = getZetaPoints()
-        #split these points with , as delimiter
-        tau_pointsExcel = tau_pointsExcel.split(',')
-        zeta_pointsExcel = zeta_pointsExcel.split(',')
-        #doesnt mean points are correct data type though
-    except:
-        #error finding excel file
-        #so tau/zeta points arent reassigned
-        pass
-    #Since inputs from Blender are a string, this splits the string on commas and makes a list
-    tau_points = tau_points.split(',') 
-    zeta_points = zeta_points.split(',')
+    Np = len(z_points)
+    t_array = np.array(np.zeros(Np))
+    z_array = np.array(np.zeros(Np))
+    c_array = np.array(np.zeros(Np))
 
-    Np = len(zeta_points) #Number of points
-    tau_S = np.array(np.zeros(Np))
-    zet_S = np.array(np.zeros(Np))
-    chi_S = np.array(np.zeros(Np))
-
-    #Fills the numpy arrays with the list values
-    
-    try:
-        for i in range(0, len(tau_pointsExcel)):
-            #using excel points
-            #there could still be an error with the data type of the value so check the array of points from excel
-            tau_S[i] = tau_pointsExcel[i]
-            zet_S[i] = zeta_pointsExcel[i]
-    except:
-    	#error found in excel points, revert to original
-        for i in range(0, len(tau_points)):
-            #using default points if theres a problem with excel points
-            tau_S[i] = tau_points[i]
-            zet_S[i] = zeta_points[i]
-
-    #Executes code from the tau_chi function
+    #fill arrays
+    for i in range(0, len(t_points)):
+        t_array[i] = t_points[i]
+        z_array[i] = z_points[i]
     for i in range(0, Np):
-        chi_S[i] = 1 - (1 - delta) * math.sin(PIRAD * tau_S[i])
+        c_array[i] = 1 - (1 - delta) * math.sin(PIRAD * t_array[i])
 
     Left_to_Right = 1
     n = Np - 1
@@ -93,10 +121,9 @@ def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacem
     Y = np.array(np.zeros(Np))
 
     for i in range(0,Np):
-        X[i] = tau_S[i] #Probably didn't need to make a new array for these, just following the VB code
-        Y[i] = zet_S[i]
+        X[i] = t_array[i]
+        Y[i] = z_array[i]
 
-    #Executes code from the polyomial function
     Xo = X[0]
     Yo = Y[0]
     Xn = X[n]
@@ -115,9 +142,34 @@ def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacem
                 A[i,j] = (X[i+1] - Xo) ** (j+1)
             else:
                 A[i,j] = (X[n] - Xn) ** (j+1)
+    #place A and B matrices into an array to be accessed later
+    #passing references of Np and n in
+    AB = [A,B, Np, n]
+    return AB
 
-    coefficient = np.linalg.solve(A,B) #Executes code from the gauss and solve functions
-
+def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, wing_displacement, location, rotation, scale):
+    #passing in tau and zeta points, and true to check excel file
+    AB = defineMatrices(delta, tau_points, zeta_points, True)
+    A = AB[0]
+    B = AB[1]
+    #references of Np and n
+    Np = AB[2]
+    n = AB[3]
+    
+    try:
+        #Executes code from the gauss and solve functions
+        coefficient = np.linalg.solve(A,B)
+    except:
+        print("Problem with user inputs causing Singular Matrix error.")
+        print("Now using default input points...")
+        #passing in default tau and zeta points
+        #False so the function knows not to waste time by
+        #going through excel points
+        AB = defineMatrices(delta, TAU_DEFAULT, ZETA_DEFAULT, False)
+        A = AB[0]
+        B = AB[1]
+        coefficient = np.linalg.solve(A,B)
+  
     #The following code turns the coefficient results into strings that can be used by Blender to generate the object.
     #There are three equations, Chi is the y axis, Zeta is the z axis, and x has its own equation that makes each cross section smaller.
     #This code makes a cross section along the y and z axis, for fuselage you'd probably want a cross section along different axes.
@@ -125,21 +177,48 @@ def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacem
     y_equation = "(" + chi_eq.replace("delta", str(delta))
     y_equation = y_equation + ")*" + str(washout) + "*v-" + str(washout_displacement) + "*v"
     z_equation = "("
+
     for i in range(1,n+1):
         z_equation = z_equation + str(coefficient.item(i-1)) + "*u**"+str(i)
         if(i != n):
             z_equation = z_equation + "+"
         else:
             z_equation = z_equation + ")*" + str(washout) + "*v"
-
+ 
     #This line actually creates the object
     bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
     bpy.ops.mesh.primitive_xyz_function_surface(x_eq="-"+x_equation+"+"+str(wing_displacement), y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
-    
+    #join objects together
+    for ob in bpy.context.scene.objects:
+        if ob.type == 'MESH':
+            ob.select = True
+            bpy.context.scene.objects.active = ob
+        else:
+            ob.select = False
+    bpy.ops.object.join()
 
-#    User interface
-#
- 
+    bpy.context.object.rotation_euler[1] = 1.5708
+    
+    #LOCATION
+    print(bpy.context.object.location)
+    bpy.context.object.location[0] = location[0]
+    bpy.context.object.location[1] = location[1]
+    bpy.context.object.location[2] = location[2]
+
+    #ROTATION
+    #----------------------------------------
+    #Convert rotation[n] from degrees to radians
+    #----------------------------------------
+    bpy.context.object.rotation_euler[0] = rotation[0]
+    bpy.context.object.rotation_euler[1] = rotation[1]
+    bpy.context.object.rotation_euler[2] = rotation[2]
+
+    #SCALE
+    bpy.context.object.scale[0] = scale[0]
+    bpy.context.object.scale[1] = scale[1]
+    bpy.context.object.scale[2] = scale[2]
+
+#---------------------------------------------------
 from bpy.props import *
  
 class SymmetricalWings(bpy.types.Operator):
@@ -175,9 +254,12 @@ class SymmetricalWings(bpy.types.Operator):
         layout.prop(self, "washout")
         layout.prop(self, "washout_displacement")
         layout.prop(self, "wing_length")
+        layout.prop(self, "location")
+        layout.prop(self, "rotation")
+        layout.prop(self, "scale")
         
     def execute(self, context):
-        ob = add_wings(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.wing_displacement)
+        ob = add_wings(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.wing_displacement, self.location, self.rotation, self.scale)
         ob = bpy.context.active_object
         ob["component"] = "symmetrical wings"
         ob["delta"] = self.delta
@@ -207,7 +289,7 @@ class updateSymmetricalWing(bpy.types.Operator):
         for obj in scn.objects:
             if obj.select == True:
                 ob = obj
-        newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"])
+        newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale)
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "wing"
