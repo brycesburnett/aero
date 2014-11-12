@@ -39,7 +39,7 @@ def getZetaPoints():
         f.close()
     return zetaString;
 
-def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, wing_displacement, location, rotation, scale):
+def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, wing_displacement):
 
     #Constants
     PIRAD = 3.14159
@@ -135,26 +135,7 @@ def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacem
     #This line actually creates the object
     bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
     bpy.ops.mesh.primitive_xyz_function_surface(x_eq="-"+x_equation+"+"+str(wing_displacement), y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
-
-    bpy.context.object.rotation_euler[1] = 1.5708
     
-    #LOCATION
-    bpy.context.object.location[0] = location[0]
-    bpy.context.object.location[1] = location[1]
-    bpy.context.object.location[2] = location[2]
-
-    #ROTATION
-    #----------------------------------------
-    #Convert rotation[n] from degrees to radians
-    #----------------------------------------
-    bpy.context.object.rotation_euler[0] = rotation[0]
-    bpy.context.object.rotation_euler[1] = rotation[1]
-    bpy.context.object.rotation_euler[2] = rotation[2]
-
-    #SCALE
-    bpy.context.object.scale[0] = scale[0]
-    bpy.context.object.scale[1] = scale[1]
-    bpy.context.object.scale[2] = scale[2]
 
 #    User interface
 #
@@ -194,12 +175,9 @@ class SymmetricalWings(bpy.types.Operator):
         layout.prop(self, "washout")
         layout.prop(self, "washout_displacement")
         layout.prop(self, "wing_length")
-        layout.prop(self, "location")
-        layout.prop(self, "rotation")
-        layout.prop(self, "scale")
         
     def execute(self, context):
-        ob = add_wings(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.wing_displacement, self.location, self.rotation, self.scale)
+        ob = add_wings(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.wing_displacement)
         ob = bpy.context.active_object
         ob["component"] = "symmetrical wings"
         ob["delta"] = self.delta
@@ -228,7 +206,7 @@ class updateSymmetricalWing(bpy.types.Operator):
         for obj in scn.objects:
             if obj.select == True:
                 ob = obj
-        newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale)
+        newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"])
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "wing"
