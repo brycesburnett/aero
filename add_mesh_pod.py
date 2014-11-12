@@ -170,7 +170,7 @@ class Pod(bpy.types.Operator):
     def execute(self, context):
         ob = add_pod(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness)
         ob = bpy.context.active_object
-        ob["component"] = "wing"
+        ob["component"] = "pod"
         ob["delta"] = self.delta
         ob["chi_eq"] = self.chi_eq
         ob["tau_points"] = self.tau_points
