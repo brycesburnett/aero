@@ -188,6 +188,7 @@ class SymmetricalWings(bpy.types.Operator):
         ob["washout_displacement"] = self.washout_displacement
         ob["wing_length"] = self.wing_length
         ob.name = self.idname
+        ob["identifier"] = self.idname
         bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
 
@@ -222,6 +223,7 @@ class updateSymmetricalWing(bpy.types.Operator):
         bpy.ops.object.delete()
         newOb = bpy.context.active_object
         wm.srch_index = -1
+        ob["identifier"] = self.idname
         bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
 
