@@ -3,7 +3,7 @@ bl_info = {
     "author": "CSULB CECS 491 Team 4",
     "version": (1, 0),
     "description": "Provides functionality to update the selected component.",
-    "category": "Object"
+    "category": "Add Mesh"
     }
     
 import bpy
