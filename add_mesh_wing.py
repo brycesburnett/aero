@@ -1,10 +1,10 @@
 #This code is needed for an addon as well as deleting the if __name__ statement at the bottom.
 bl_info = {
     "name": "Add Wing",
-	"author": "CSULB CECS 491 Team 4",
-	"version": (1, 0),
-	"description": "Generates a single wing using parametric cubic splines.",
-	"category": "Object"
+    "author": "CSULB CECS 491 Team 4",
+    "version": (1, 0),
+    "description": "Generates a single wing using parametric cubic splines.",
+    "category": "Object"
 }
 
 import bpy, math
@@ -38,7 +38,7 @@ def getZetaPoints():
     return zetaString;
     
 
-def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, x_location, y_location, z_location):
+def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, location, rotation, scale):
 
     #Constants
     PIRAD = 3.14159
@@ -134,10 +134,24 @@ def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displaceme
     #This line actually creates the object
     bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
     bpy.context.object.rotation_euler[1] = 1.5708
-    bpy.context.object.location[0] = x_location
-    bpy.context.object.location[1] = y_location
-    bpy.context.object.location[2] = z_location
 
+    #LOCATION
+    bpy.context.object.location[0] = location[0]
+    bpy.context.object.location[1] = location[1]
+    bpy.context.object.location[2] = location[2]
+
+    #ROTATION
+    #----------------------------------------
+    #Convert rotation[n] from degrees to radians
+    #----------------------------------------
+    bpy.context.object.rotation_euler[0] = rotation[0]
+    bpy.context.object.rotation_euler[1] = rotation[1]
+    bpy.context.object.rotation_euler[2] = rotation[2]
+
+    #SCALE
+    bpy.context.object.scale[0] = scale[0]
+    bpy.context.object.scale[1] = scale[1]
+    bpy.context.object.scale[2] = scale[2]
 
 #    User interface
 #
@@ -149,8 +163,10 @@ class Wing(bpy.types.Operator):
     bl_idname = "mesh.wing_add"
     bl_label = "Add a wing"
     bl_options = {'REGISTER', 'PRESET'}
- 
+
+    
     #Input variables go here
+    idname = StringProperty(name="Unique Identifier", default = "Wing")
     delta = FloatProperty(name="Delta", default=0.05)
     chi_eq = StringProperty(name="Chi parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
     tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
@@ -158,15 +174,40 @@ class Wing(bpy.types.Operator):
     washout = FloatProperty(name="Washout", default = 0.16)
     washout_displacement = FloatProperty(name="Washout Displacement", default = 0.65)
     wing_length = FloatProperty(name="Adjust wing length", default =3.5, min = 3.00)
-    x_location = FloatProperty(name="X location", default = 0)
-    y_location = FloatProperty(name="Y location", default = 0)
-    z_location = FloatProperty(name="Z location", default = 0)
-    
+
+    location = FloatVectorProperty(name="Location", default = (0.0, 0.0, 0.0), subtype='XYZ')
+    rotation = IntVectorProperty(name="Rotation", default = (0.0, 0.0, 0.0), subtype='XYZ')
+    scale = FloatVectorProperty(name="Scale", default = (1.0, 1.0, 1.0), subtype='XYZ')
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        layout.operator("open.file_path", text = "Open Excel File", icon = 'FILESEL')
+        layout.prop(self, "idname")
+        layout.prop(self, "delta")
+        layout.prop(self, "chi_eq")
+        layout.prop(self, "tau_points")
+        layout.prop(self, "zeta_points")
+        layout.prop(self, "washout")
+        layout.prop(self, "washout_displacement")
+        layout.prop(self, "wing_length")
+        layout.prop(self, "location")
+        layout.prop(self, "rotation")
+        layout.prop(self, "scale")
+                
     def execute(self, context):
-        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.x_location, self.y_location, self.z_location)
+        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.location, self.rotation, self.scale)
         ob = bpy.context.active_object
         ob["component"] = "wing"
-        ob.name = "Wing"
+        ob["delta"] = self.delta
+        ob["chi_eq"] = self.chi_eq
+        ob["tau_points"] = self.tau_points
+        ob["zeta_points"] = self.zeta_points
+        ob["washout"] = self.washout
+        ob["washout_displacement"] = self.washout_displacement
+        ob["wing_length"] = self.wing_length
+        ob.name = self.idname
+        bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -178,18 +219,43 @@ class updateWing(bpy.types.Operator):
     bl_label = "Update a wing"
     bl_options = {'INTERNAL'}
 
-    #Input variables go here
-    delta = FloatProperty(name="Delta", default=0.05)
-    chi_eq = StringProperty(name="Chi parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
-    tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
-    zeta_points = StringProperty(name="Zeta points", description="User input points", default="0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00")
-    washout = FloatProperty(name="Washout", default = 0.16)
-    washout_displacement = FloatProperty(name="Washout Displacement", default = 0.65)
-    wing_length = FloatProperty(name="Adjust wing length", default =3.5, min = 3.00)
-    x_location = FloatProperty(name="X location", default = 0)
-    y_location = FloatProperty(name="Y location", default = 0)
-    z_location = FloatProperty(name="Z location", default = 0)
+    def execute(self, context):
+        wm = context.window_manager.MyProperties
+        scn = context.scene
+        for obj in scn.objects:
+            if obj.select == True:
+                ob = obj
+        newOb = add_wing(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale)
+        newOb = bpy.context.active_object
+        newOb.name = ob.name
+        newOb["component"] = "wing"
+        newOb["delta"] = ob["delta"]
+        newOb["chi_eq"] = ob["chi_eq"]
+        newOb["tau_points"] = ob["tau_points"]
+        newOb["zeta_points"] = ob["zeta_points"]
+        newOb["washout"] = ob["washout"]
+        newOb["washout_displacement"] = ob["washout_displacement"]
+        newOb["wing_length"] = ob["wing_length"]
+        ob.select = True
+        newOb.select = False
+        bpy.ops.object.delete()
+        newOb = bpy.context.active_object
+        wm.srch_index = -1
+        bpy.ops.view3d.obj_search_refresh()
+        return {'FINISHED'}
 
-    def invoke(self, context, event):
-        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.x_location, self.y_location, self.z_location)
+class deleteWing(bpy.types.Operator):
+    bl_idname = "mesh.wing_delete"
+    bl_label = "Update a wing"
+    bl_options = {'INTERNAL'}
+
+    def execute(self, context):
+        wm = context.window_manager.MyProperties
+        scn = context.scene
+        for obj in scn.objects:
+            if obj.select == True:
+                ob = obj
+        bpy.ops.object.delete()
+        wm.srch_index = -1
+        bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
