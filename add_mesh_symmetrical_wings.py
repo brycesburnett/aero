@@ -19,10 +19,10 @@ def getTauPoints():
     	mycsv = list(mycsv)
     	tauString = ""
     	for i in range(1,7):
-        	if i == 6:
-            	tauString += mycsv[i][0]
-        	else:
-            	tauString += tauString += mycsv[i][0]+','
+            if i == 6:
+                tauString += mycsv[i][0]
+            else:
+                tauString += mycsv[i][0]+','
     return tauString;
 
 def getZetaPoints():
@@ -31,10 +31,10 @@ def getZetaPoints():
     	mycsv = list(mycsv)
     	zetaString = ""
     	for i in range(1,7):
-        	if i == 6:
-            	zetaString += mycsv[i][1])
-        	else:
-            	zetaString += zetaString += mycsv[i][1])+','
+            if i == 6:
+                zetaString += mycsv[i][1]
+            else:
+                zetaString += mycsv[i][1]+','
     return zetaString;
     
 
