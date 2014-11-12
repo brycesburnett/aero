@@ -156,11 +156,88 @@ class SymmetricalWings(bpy.types.Operator):
     washout_displacement = FloatProperty(name="Washout displacement", default = 0.65)
     wing_length = FloatProperty(name="Adjust wing length", default =6.0, min = 3.00)
     wing_displacement = FloatProperty(name="Adjust wing displacement", default = 12.00, min =0.00)
-    
+
+    location = FloatVectorProperty(name="Location", default = (0.0, 0.0, 0.0), subtype='XYZ')
+    rotation = IntVectorProperty(name="Rotation", default = (0.0, 0.0, 0.0), subtype='XYZ')
+    scale = FloatVectorProperty(name="Scale", default = (1.0, 1.0, 1.0), subtype='XYZ')
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        layout.operator("open.file_path", text = "Open Excel File", icon = 'FILESEL')
+        layout.prop(self, "idname")
+        layout.prop(self, "delta")
+        layout.prop(self, "chi_eq")
+        layout.prop(self, "tau_points")
+        layout.prop(self, "zeta_points")
+        layout.prop(self, "washout")
+        layout.prop(self, "washout_displacement")
+        layout.prop(self, "wing_length")
+        layout.prop(self, "location")
+        layout.prop(self, "rotation")
+        layout.prop(self, "scale")
+                
     def execute(self, context):
-        ob = add_wings(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.wing_displacement)
+        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.location, self.rotation, self.scale)
         ob = bpy.context.active_object
-        ob["component"] = "symmetrical wings"
-        ob.name = "Symmetrical Wings"
+        ob["component"] = "wing"
+        ob["delta"] = self.delta
+        ob["chi_eq"] = self.chi_eq
+        ob["tau_points"] = self.tau_points
+        ob["zeta_points"] = self.zeta_points
+        ob["washout"] = self.washout
+        ob["washout_displacement"] = self.washout_displacement
+        ob["wing_length"] = self.wing_length
+        ob.name = self.idname
+        bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
- 
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+class updateWing(bpy.types.Operator):
+    bl_idname = "mesh.wing_update"
+    bl_label = "Update a wing"
+    bl_options = {'INTERNAL'}
+
+    def execute(self, context):
+        wm = context.window_manager.MyProperties
+        scn = context.scene
+        for obj in scn.objects:
+            if obj.select == True:
+                ob = obj
+        newOb = add_wing(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale)
+        newOb = bpy.context.active_object
+        newOb.name = ob.name
+        newOb["component"] = "wing"
+        newOb["delta"] = ob["delta"]
+        newOb["chi_eq"] = ob["chi_eq"]
+        newOb["tau_points"] = ob["tau_points"]
+        newOb["zeta_points"] = ob["zeta_points"]
+        newOb["washout"] = ob["washout"]
+        newOb["washout_displacement"] = ob["washout_displacement"]
+        newOb["wing_length"] = ob["wing_length"]
+        ob.select = True
+        newOb.select = False
+        bpy.ops.object.delete()
+        newOb = bpy.context.active_object
+        wm.srch_index = -1
+        bpy.ops.view3d.obj_search_refresh()
+        return {'FINISHED'}
+
+class deleteWing(bpy.types.Operator):
+    bl_idname = "mesh.wing_delete"
+    bl_label = "Update a wing"
+    bl_options = {'INTERNAL'}
+
+    def execute(self, context):
+        wm = context.window_manager.MyProperties
+        scn = context.scene
+        for obj in scn.objects:
+            if obj.select == True:
+                ob = obj
+        bpy.ops.object.delete()
+        wm.srch_index = -1
+        bpy.ops.view3d.obj_search_refresh()
+        return {'FINISHED'}
