@@ -184,7 +184,7 @@ class Pod(bpy.types.Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
-class updateWing(bpy.types.Operator):
+class updatePod(bpy.types.Operator):
     bl_idname = "mesh.pod_update"
     bl_label = "Update a pod"
     bl_options = {'INTERNAL'}
@@ -212,7 +212,7 @@ class updateWing(bpy.types.Operator):
         bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
 
-class deleteWing(bpy.types.Operator):
+class deletePod(bpy.types.Operator):
     bl_idname = "mesh.pod_delete"
     bl_label = "Update a pod"
     bl_options = {'INTERNAL'}
