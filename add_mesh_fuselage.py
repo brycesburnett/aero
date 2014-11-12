@@ -9,6 +9,7 @@ bl_info = {
 
 import bpy, math
 import numpy as np
+import csv
 
 #location of points excel sheet
 file_location = "C:/points.xlsx"
