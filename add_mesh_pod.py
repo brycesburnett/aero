@@ -148,7 +148,7 @@ class Pod(bpy.types.Operator):
     bl_options = {'REGISTER', 'PRESET'}
  
     #Input variables go here
-    idname = StringProperty(name="Unique identifier", default="Wing")
+    idname = StringProperty(name="Unique identifier", default="Pod")
     delta = FloatProperty(name="Delta", default=0.05)
     chi_eq = StringProperty(name="Chi parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
     tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
