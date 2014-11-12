@@ -63,10 +63,19 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             layout.operator("mesh.wing_update", text="Update Wing", icon='UV_SYNC_SELECT')
             layout.operator("mesh.wing_delete", text="Delete Wing", icon='UGLYPACKAGE')
         elif(obj["component"] == "symmetrical wings"):
-            layout.label("Show symmetrical wing properties")
-            #------------------------------------------------------
-            #ADD STUFF HERE SIMILAR TO WING
-            #------------------------------------------------------
+            layout.label("Symmetrical wing properties:")
+            layout.prop(obj, '["delta"]', text = "Delta")
+            layout.prop(obj, '["chi_eq"]', text = "Chi Parameterization Equation")
+            layout.prop(obj, '["tau_points"]', text = "Tau Points")
+            layout.prop(obj, '["zeta_points"]', text = "Zeta Points")
+            layout.prop(obj, '["washout"]', text = "Washout")
+            layout.prop(obj, '["washout_displacement"]', "Washout Displacement")
+            layout.prop(obj, '["wing_length"]', "Wing Length")
+            layout.prop(obj, 'location')
+            layout.prop(obj, 'rotation_euler')
+            layout.prop(obj, 'scale')
+            layout.operator("mesh.wing_update", text="Update Wing", icon='UV_SYNC_SELECT')
+            layout.operator("mesh.wing_delete", text="Delete Wing", icon='UGLYPACKAGE')
         elif(obj["component"] == "fuselage"):
             layout.label("Show fuselage properties")
         elif(obj["component"] == "pod"):
