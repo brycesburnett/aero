@@ -176,19 +176,7 @@ class MyProperties(bpy.types.PropertyGroup):
     srch_objects = CollectionProperty(type=bpy.types.PropertyGroup)
     srch_index = IntProperty(update=update_obj_search_index)
     
-    
-#-----------------------------------------------------------------------------
-#                                                                             
-#                             Register / Unregister                         
-#                                                                             
-#-----------------------------------------------------------------------------
-def register():
-    bpy.utils.register_module(__name__)
-    bpy.types.WindowManager.MyProperties = PointerProperty(type=MyProperties, options={'SKIP_SAVE'})
-    
-def unregister():
-    del bpy.types.WindowManager.MyProperties
-    bpy.utils.unregister_module(__name__)
+bpy.utils.register_class(MyProperties)    
 
-if __name__ == "__main__":
-    register()
+bpy.types.WindowManager.MyProperties = PointerProperty(type=MyProperties, options={'SKIP_SAVE'})
+    

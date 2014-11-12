@@ -15,12 +15,14 @@ if "bpy" in locals():
     imp.reload(add_mesh_pod)
     imp.reload(add_mesh_fuselage)
     imp.reload(open_file_path)
+    imp.reload(update_component)
 else:
     from . import add_mesh_wing
     from . import add_mesh_symmetrical_wings
     from . import add_mesh_pod
     from . import add_mesh_fuselage
     from . import open_file_path
+    from . import update_component
 
 import bpy
 from bpy.props import *
