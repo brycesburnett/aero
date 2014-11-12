@@ -78,8 +78,19 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             layout.operator("mesh.wing_delete", text="Delete Wing", icon='UGLYPACKAGE')
         elif(obj["component"] == "fuselage"):
             layout.label("Show fuselage properties")
+            layout.prop(obj, '["delta"]', text = "Delta")
+            layout.prop(obj, '["chi_eq"]', text = "Chi Parameterization Equation")
+            layout.prop(obj, '["tau_points"]', text = "Tau Points")
+            layout.prop(obj, '["zeta_points"]', text = "Zeta Points")
+            layout.prop(obj, '["smoothness"]', text = "Smoothness") 
         elif(obj["component"] == "pod"):
             layout.label("Show pod properties")
+            layout.label("Show fuselage properties")
+            layout.prop(obj, '["delta"]', text = "Delta")
+            layout.prop(obj, '["chi_eq"]', text = "Chi Parameterization Equation")
+            layout.prop(obj, '["tau_points"]', text = "Tau Points")
+            layout.prop(obj, '["zeta_points"]', text = "Zeta Points")
+            layout.prop(obj, '["smoothness"]', text = "Smoothness") 
 
 #
 #   Refresh Button
