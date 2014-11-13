@@ -162,7 +162,7 @@ class Pod(bpy.types.Operator):
     '''Pod generator'''
     bl_idname = "mesh.pod_add"
     bl_label = "Add a pod"
-    bl_options = {'REGISTER', 'PRESET'}
+    bl_options = {'REGISTER', 'UNDO'}
  
     #Input variables go here
     idname = StringProperty(name="Unique identifier", default="Pod")
