@@ -36,7 +36,7 @@ def getZetaPoints():
     return zetaString;
     
 
-def add_fuselage(delta, chi_eq, tau_points, zeta_points, smoothness):
+def add_fuselage(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotation, scale):
 
     #Constants
     PIRAD = 3.14159
@@ -138,6 +138,24 @@ def add_fuselage(delta, chi_eq, tau_points, zeta_points, smoothness):
     bpy.context.object.scale[1] = 7.0
     bpy.context.object.scale[2] = 7.0
 
+    #LOCATION
+    bpy.context.object.location[0] = location[0]
+    bpy.context.object.location[1] = location[1]
+    bpy.context.object.location[2] = location[2]
+
+    #ROTATION
+    #----------------------------------------
+    #Convert rotation[n] from degrees to radians
+    #----------------------------------------
+    bpy.context.object.rotation_euler[0] = rotation[0]
+    bpy.context.object.rotation_euler[1] = rotation[1]
+    bpy.context.object.rotation_euler[2] = rotation[2]
+
+    #SCALE
+    bpy.context.object.scale[0] = scale[0]
+    bpy.context.object.scale[1] = scale[1]
+    bpy.context.object.scale[2] = scale[2]
+    
 #    User interface
 #
  
@@ -171,10 +189,12 @@ class Fuselage(bpy.types.Operator):
         layout.prop(self, "tau_points")
         layout.prop(self, "zeta_points")
         layout.prop(self, "smoothness")
-        
+        layout.prop(self, "location")
+        layout.prop(self, "rotation")
+        layout.prop(self, "scale")
 
     def execute(self, context):
-        ob = add_fuselage(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness)
+        ob = add_fuselage(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness, self.location, self.rotation, self.scale)
         ob = bpy.context.active_object
         ob["component"] = "fuselage"
         ob["delta"] = self.delta
@@ -201,7 +221,7 @@ class updateWing(bpy.types.Operator):
         for obj in scn.objects:
             if obj.select == True:
                 ob = obj
-        newOb = add_fuselage(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["smoothness"])
+        newOb = add_fuselage(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["smoothness"], ob.location, ob.rotation_euler, ob.scale)
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "fuselage"
