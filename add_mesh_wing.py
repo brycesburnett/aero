@@ -214,7 +214,7 @@ class Wing(bpy.types.Operator):
 
 class updateWing(bpy.types.Operator):
     bl_idname = "mesh.wing_update"
-    bl_label = "Update a wing"
+    bl_label = "Update Wing"
     bl_options = {'INTERNAL'}
 
     def execute(self, context):
@@ -244,15 +244,19 @@ class updateWing(bpy.types.Operator):
 
 class deleteWing(bpy.types.Operator):
     bl_idname = "mesh.wing_delete"
-    bl_label = "Update a wing"
+    bl_label = "Delete Wing? (Click elsewhere to cancel.)"
     bl_options = {'INTERNAL'}
+        
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
 
     def execute(self, context):
         wm = context.window_manager.MyProperties
         scn = context.scene
         for obj in scn.objects:
             if obj.select == True:
-                ob = obj
+                ob = obj        
         bpy.ops.object.delete()
         wm.srch_index = -1
         bpy.ops.view3d.obj_search_refresh()
