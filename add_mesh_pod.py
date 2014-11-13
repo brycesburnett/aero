@@ -36,7 +36,7 @@ def getZetaPoints():
     return zetaString;
     
 
-def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness):
+def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotation, scale):
 
     #Constants
     PIRAD = 3.14159
@@ -135,6 +135,23 @@ def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness):
     bpy.ops.mesh.remove_doubles()
     bpy.ops.object.mode_set(mode='OBJECT')
 
+    #LOCATION
+    bpy.context.object.location[0] = location[0]
+    bpy.context.object.location[1] = location[1]
+    bpy.context.object.location[2] = location[2]
+
+    #ROTATION
+    #----------------------------------------
+    #Convert rotation[n] from degrees to radians
+    #----------------------------------------
+    bpy.context.object.rotation_euler[0] = rotation[0]
+    bpy.context.object.rotation_euler[1] = rotation[1]
+    bpy.context.object.rotation_euler[2] = rotation[2]
+
+    #SCALE
+    bpy.context.object.scale[0] = scale[0]
+    bpy.context.object.scale[1] = scale[1]
+    bpy.context.object.scale[2] = scale[2]
 
 #    User interface
 #
