@@ -139,9 +139,9 @@ def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displaceme
     bpy.context.object.location[2] = location[2]
 
     #ROTATION
-    #----------------------------------------
-    #Convert rotation[n] from degrees to radians
-    #----------------------------------------
+    rotation[0] = rotation[0]*RqD
+    rotation[1] = rotation[1]*RqD
+    rotation[2] = rotation[2]*RqD
     bpy.context.object.rotation_euler[0] = rotation[0]
     bpy.context.object.rotation_euler[1] = rotation[1]
     bpy.context.object.rotation_euler[2] = rotation[2]
