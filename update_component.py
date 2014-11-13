@@ -40,17 +40,18 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
         row = layout.row()
         row.alignment = 'CENTER'
         row.operator(VIEW3D_OT_refresh.bl_idname, text="Refresh Component List", icon="FILE_REFRESH")
-        layout.label("Choose component to edit:")
+        layout.label("Choose component to edit:", icon = "TEXT")
         # Outputfield
         layout.template_list("ObjectSearchList", "",
                              wm, "srch_objects", 
                              wm, "srch_index")
 
         obj = bpy.data.objects[wm.srch_objects[wm.srch_index].name]
+        layout.separator()
         if(wm.srch_index == -1):
-            layout.label("Choose a component")
+            layout.label("")
         elif(obj["component"] == "wing"):
-            layout.label("Wing Geometry:")
+            layout.label("Wing Geometry:", icon = "CURVE_NCURVE")
             row = layout.row()
             box = row.box()
             box.prop(obj, '["delta"]', text = "Delta")
@@ -62,7 +63,7 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             box.prop(obj, '["wing_length"]', "Wing Length")
 
             layout.separator()
-            layout.label("Transformations:")
+            layout.label("Transformations:", icon = "MOD_ARRAY")
             row = layout.row()
             box = row.box()
             box.prop(obj, 'location')
@@ -75,7 +76,7 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             row.operator("mesh.wing_update", text="Update Wing", icon='UV_SYNC_SELECT')
             row.operator("mesh.wing_delete", text="Delete Wing", icon='UGLYPACKAGE')
         elif(obj["component"] == "symmetrical wings"):
-            layout.label("Symmetrical Wing Geometry:")
+            layout.label("Symmetrical Wing Geometry:", icon = "CURVE_NCURVE")
             row = layout.row()
             box = row.box()
             box.prop(obj, '["delta"]', text = "Delta")
@@ -87,7 +88,7 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             box.prop(obj, '["wing_length"]', "Wing Length")
 
             layout.separator()
-            layout.label("Transformations:")
+            layout.label("Transformations:", icon = "MOD_ARRAY")
             row = layout.row()
             box = row.box()
             box.prop(obj, 'location')
@@ -100,7 +101,7 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             row.operator("mesh.symmetrical_wings_update", text="Update Wings", icon='UV_SYNC_SELECT')
             row.operator("mesh.symmetrical_wings_delete", text="Delete Wings", icon='UGLYPACKAGE')
         elif(obj["component"] == "fuselage"):
-            layout.label("Fuselage Geometry:")
+            layout.label("Fuselage Geometry:", icon = "CURVE_NCURVE")
             row = layout.row()
             box = row.box()
             box.prop(obj, '["delta"]', text = "Delta")
@@ -110,7 +111,7 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             box.prop(obj, '["smoothness"]', text = "Smoothness")
 
             layout.separator()
-            layout.label("Transformations:")
+            layout.label("Transformations:", icon = "MOD_ARRAY")
             row = layout.row()
             box = row.box()
             box.prop(obj, 'location')
@@ -123,7 +124,7 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             row.operator("mesh.fuselage_update", text="Update Fuselage", icon='UV_SYNC_SELECT')
             row.operator("mesh.fuselage_delete", text="Delete Fuselage", icon='UGLYPACKAGE')
         elif(obj["component"] == "pod"):
-            layout.label("Pod Geometry")
+            layout.label("Pod Geometry", icon = "CURVE_NCURVE")
             row = layout.row()
             box = row.box()
             box.label("Show fuselage properties")
@@ -134,7 +135,7 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             box.prop(obj, '["smoothness"]', text = "Smoothness")
 
             layout.separator()
-            layout.label("Transformations:")
+            layout.label("Transformations:", icon = "MOD_ARRAY")
             row = layout.row()
             box = row.box()
             box.prop(obj, 'location')
