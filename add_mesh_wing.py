@@ -160,7 +160,7 @@ class Wing(bpy.types.Operator):
     '''Single Wing generator'''
     bl_idname = "mesh.wing_add"
     bl_label = "Add a wing"
-    bl_options = {'REGISTER', 'PRESET'}
+    bl_options = {'REGISTER', 'UNDO'}
 
     
     #Input variables go here
