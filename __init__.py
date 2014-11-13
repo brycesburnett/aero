@@ -56,7 +56,7 @@ class aircraft_component_panel(bpy.types.Panel):
         layout.operator("mesh.fuselage_add", text="Fuselage")    
 
 def menu_func(self, context):
-    self.layout.menu("mesh_aircraft_components_add", icon="PLUGIN")
+    self.layout.menu("mesh_aircraft_components_add", icon="PLUGIN", icon="FORCE_DRAG")
 
 def register():
     bpy.utils.register_module(__name__)
