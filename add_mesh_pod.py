@@ -154,6 +154,11 @@ class Pod(bpy.types.Operator):
     tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
     zeta_points = StringProperty(name="Zeta points", description="User input points", default="0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00")
     smoothness = StringProperty(name="Smoothness", description="Smoothness of the pod", default = "32")
+
+    location = FloatVectorProperty(name="Location", default = (0.0, 0.0, 0.0), subtype='XYZ')
+    rotation = IntVectorProperty(name="Rotation", default = (0.0, 0.0, 0.0), subtype='XYZ')
+    scale = FloatVectorProperty(name="Scale", default = (1.0, 1.0, 1.0), subtype='XYZ')
+
     
     def draw(self, context):
        layout = self.layout
@@ -165,10 +170,13 @@ class Pod(bpy.types.Operator):
        layout.prop(self, "tau_points")
        layout.prop(self, "zeta_points")
        layout.prop(self, "smoothness")
+       layout.prop(self, "location")
+       layout.prop(self, "rotation")
+       layout.prop(self, "scale")
  
                 
     def execute(self, context):
-        ob = add_pod(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness)
+        ob = add_pod(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness, self.location, self.rotation, self.scale)
         ob = bpy.context.active_object
         ob["component"] = "pod"
         ob["delta"] = self.delta
@@ -195,7 +203,7 @@ class updatePod(bpy.types.Operator):
         for obj in scn.objects:
             if obj.select == True:
                 ob = obj
-        newOb = add_pod(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["smoothness"])
+        newOb = add_pod(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["smoothness"], ob.location, ob.rotation_euler, ob.scale)
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "pod"
