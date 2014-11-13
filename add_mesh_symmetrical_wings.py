@@ -72,10 +72,11 @@ def validateUserPoints(t_points, z_points):
 def defineMatrices(delta, t_points, z_points, useExcelPoints):
     print("")
     if useExcelPoints:
-        #try to get points from excel sheet
-        t_pointsExc = getTauPoints()
-        z_pointsExc = getZetaPoints()
+        
         try:
+            #try to get points from excel sheet
+            t_pointsExc = getTauPoints()
+            z_pointsExc = getZetaPoints()
             #TRY because we don't know if they're valid yet
             t_TRY = t_pointsExc.split(',')
             z_TRY = z_pointsExc.split(',')
@@ -96,7 +97,8 @@ def defineMatrices(delta, t_points, z_points, useExcelPoints):
             #so tau/zeta points arent reassigned
             print("Error with excel values or finding file.")
             print("Using default input points...")
-            
+            t_points = t_points.split(',')
+            z_points = z_points.split(',')
             pass
     else:
         t_points = t_points.split(',')
