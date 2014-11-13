@@ -240,8 +240,12 @@ class updateWing(bpy.types.Operator):
 
 class deleteFuselage(bpy.types.Operator):
     bl_idname = "mesh.fuselage_delete"
-    bl_label = "Update fuselage"
+    bl_label = "Delete fuselage? (Click elsewhere to cancel.)"
     bl_options = {'INTERNAL'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
 
     def execute(self, context):
         wm = context.window_manager.MyProperties
