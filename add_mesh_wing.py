@@ -118,19 +118,24 @@ def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displaceme
     #The following code turns the coefficient results into strings that can be used by Blender to generate the object.
     #There are three equations, Chi is the y axis, Zeta is the z axis, and x has its own equation that makes each cross section smaller.
     #This code makes a cross section along the y and z axis, for fuselage you'd probably want a cross section along different axes.
-    x_equation = "v-" + str(wing_length)
-    y_equation = "(" + chi_eq.replace("delta", str(delta))
-    y_equation = y_equation + ")*" + str(washout) + "*v-" + str(washout_displacement) + "*v"
-    z_equation = "("
+    c_equation = "-" + str(washout / wing_length) + "*v+" + str(washout)
+    f_equation = str(washout_displacement) + "*v"
+
+    x_equation = "v"
+    a_equation = chi_eq.replace("delta", str(delta))
+    b_equation = "("
     for i in range(1,n+1):
-        z_equation = z_equation + str(coefficient.item(i-1)) + "*u**"+str(i)
+        b_equation = b_equation + str(coefficient.item(i-1)) + "*u**"+str(i)
         if(i != n):
-            z_equation = z_equation + "+"
+            b_equation = b_equation + "+"
         else:
-            z_equation = z_equation + ")*" + str(washout) + "*v"
+            b_equation = b_equation + ")"
+
+    y_equation = "a*c+f"
+    z_equation = "b*c"
 
     #This line actually creates the object
-    bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
+    bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, a_eq=a_equation, b_eq=b_equation, c_eq=c_equation, f_eq=f_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=0, range_v_max=wing_length, close_v=True)
     bpy.context.object.rotation_euler[1] = 1.5708
 
     #LOCATION
