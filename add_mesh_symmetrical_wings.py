@@ -71,39 +71,52 @@ def validateUserPoints(t_points, z_points):
 #else an error most likely occurred and we can bypass trying excel
 def defineMatrices(delta, t_points, z_points, useExcelPoints):
     print("")
+    fail = False
     if useExcelPoints:
-        
         try:
             #try to get points from excel sheet
             t_pointsExc = getTauPoints()
             z_pointsExc = getZetaPoints()
             #TRY because we don't know if they're valid yet
-            t_TRY = t_pointsExc.split(',')
-            z_TRY = z_pointsExc.split(',')
             #split these points with , as delimiter if valid
-            if validateUserPoints(t_TRY, z_TRY):
-                t_points = t_TRY
-                z_points = z_TRY
+            if validateUserPoints(t_pointsExc, z_pointsExc):
+                t_points = t_points.split(',')
+                z_points = z_points.split(',')
                 print("Excel values imported.")
             #else we dont bother using them
             else:
+                fail = True
                 print("Error with excel values.")
-                print("Using default input points...")
-                t_points = t_points.split(',')
-                z_points = z_points.split(',') 
-            
         except:
             #error finding excel file
             #so tau/zeta points arent reassigned
             print("Error with excel values or finding file.")
-            print("Using default input points...")
+            fail = True
+            pass
+
+        if  fail:
+            print("Using Blender input points...")
+            if validateUserPoints(t_points, z_points):
+                t_points = t_points.split(',')
+                z_points = z_points.split(',') 
+            else:
+                print("Error with Blender input points.")
+                print("Using default points...")
+                t_points = TAU_DEFAULT.split(',')
+                z_points = ZETA_DEFAULT.split(',')
+    else:
+        print("Using Blender input points...")
+        if validateUserPoints(t_points, z_points):
             t_points = t_points.split(',')
             z_points = z_points.split(',')
-            pass
-    else:
-        t_points = t_points.split(',')
-        z_points = z_points.split(',')
-
+        else:
+            print("Error with Blender input points")
+            print("Using default points...")
+            t_points = TAU_DEFAULT.split(',')
+            z_points = ZETA_DEFAULT.split(',')
+    
+    print("\nTau: " + str(t_points))
+    print("Zeta: " + str(z_points)+"\n")
     Np = len(z_points)
     t_array = np.array(np.zeros(Np))
     z_array = np.array(np.zeros(Np))
