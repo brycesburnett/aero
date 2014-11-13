@@ -174,9 +174,9 @@ class Wing(bpy.types.Operator):
     chi_eq = StringProperty(name="Chi parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
     tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
     zeta_points = StringProperty(name="Zeta points", description="User input points", default="0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00")
-    washout = FloatProperty(name="Washout", default = 3.00, min = 0.00)
-    washout_displacement = FloatProperty(name="Washout Displacement", default = 1.00, min = 0.00)
-    wing_length = FloatProperty(name="Adjust wing length", default =3.00, min = 0.00)
+    washout = FloatProperty(name="Washout", default = 3.00)
+    washout_displacement = FloatProperty(name="Washout Displacement", default = 1)
+    wing_length = FloatProperty(name="Adjust wing length", default =3.5, min = 3.00)
 
     location = FloatVectorProperty(name="Location", default = (0.0, 0.0, 0.0), subtype='XYZ')
     rotation = IntVectorProperty(name="Rotation", default = (0.0, 0.0, 0.0), subtype='XYZ')
