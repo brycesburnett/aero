@@ -239,8 +239,12 @@ class updatePod(bpy.types.Operator):
 
 class deletePod(bpy.types.Operator):
     bl_idname = "mesh.pod_delete"
-    bl_label = "Update a pod"
+    bl_label = "Delete pod? (Click elsewhere to cancel.)"
     bl_options = {'INTERNAL'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
 
     def execute(self, context):
         wm = context.window_manager.MyProperties
