@@ -191,12 +191,12 @@ def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacem
     bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
     bpy.ops.mesh.primitive_xyz_function_surface(x_eq="-"+x_equation+"+"+str(wing_displacement), y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
     #join objects together
-    for ob in bpy.context.scene.objects:
-        if ob.type == 'MESH':
-            ob.select = True
-            bpy.context.scene.objects.active = ob
+    for obs in bpy.context.scene.objects:
+        if obs.name[0:3] == 'XYZ':
+            obs.select = True
+            bpy.context.scene.objects.active = obs
         else:
-            ob.select = False
+            obs.select = False
     bpy.ops.object.join()
 
     bpy.context.object.rotation_euler[1] = 1.5708
