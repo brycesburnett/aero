@@ -326,8 +326,12 @@ class updateSymmetricalWing(bpy.types.Operator):
 
 class deleteSymmetricalWings(bpy.types.Operator):
     bl_idname = "mesh.symmetrical_wings_delete"
-    bl_label = "Update symmetrical wings"
+    bl_label = "Delete symmetrical wings? (Click elsewhere to cancel.)"
     bl_options = {'INTERNAL'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
 
     def execute(self, context):
         wm = context.window_manager.MyProperties
