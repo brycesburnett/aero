@@ -50,20 +50,21 @@ def getZetaPoints():
 
 #returns True if points are valid 
 def validateUserPoints(t_points, z_points):
-    for i in range(0, len(t_points)):
+    t_split = t_points.split(',')
+    z_split = z_points.split(',')
+    for i in range(0, len(t_split)):
         try:
-            numb = float(t_points[i])
+            numb = float(t_split[i])
         except ValueError:
-            print("Tau point '" + t_points[i] + "'' is not a float.")
+            print("Tau point '" + t_split[i] + "'' is not a float.")
             return False
-    for i in range(0, len(z_points)):
+    for i in range(0, len(z_split)):
         try:
-            numb = float(z_points[i])
+            numb = float(z_split[i])
         except ValueError:
-            print("Zeta point '" + z_points[i] +"'' is not a float.")
+            print("Zeta point '" + z_split[i] +"'' is not a float.")
             return False
     return True
-
 #pass in two strings (user input points) and boolean
 #returns an array of two matrices (A and B)
 #index 0 = A, index 1 = B
@@ -304,7 +305,7 @@ class updateSymmetricalWing(bpy.types.Operator):
         for obj in scn.objects:
             if obj.select == True:
                 ob = obj
-        newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale)
+        newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob["wing_displacement"], ob.location, ob.rotation_euler, ob.scale)
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "wing"
@@ -320,7 +321,6 @@ class updateSymmetricalWing(bpy.types.Operator):
         bpy.ops.object.delete()
         newOb = bpy.context.active_object
         wm.srch_index = -1
-        ob["identifier"] = self.idname
         bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
 
