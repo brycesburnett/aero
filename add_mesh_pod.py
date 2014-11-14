@@ -40,14 +40,14 @@ def getZetaPoints():
     return zetaString;
     
 
-def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotation, scale, file_location):
+def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotation, scale, file_location, isUpdate):
 
     #Constants
     PIRAD = 3.14159
     TWOPI = 2 * PIRAD
     RqD = PIRAD / 180
 
-    #NEEDS CHECK FOR FILE LOCATION***
+    #NEEDS CHECK FOR FILE LOCATION***AND ISUPDATE 
     #try to get points from excel sheet
     try:
         tau_pointsExcel = getTauPoints()
@@ -146,11 +146,18 @@ def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotati
     bpy.context.object.location[2] = location[2]
 
     #ROTATION
-    for i in range (0, 3):
-        rotation[i] = math.radians(rotation[i])
-    bpy.context.object.rotation_euler[0] = rotation[0]
-    bpy.context.object.rotation_euler[1] = rotation[1]
-    bpy.context.object.rotation_euler[2] = rotation[2]
+    #no need to convert to euler since they have previously been converted at initial creation
+    if isUpdate:
+        bpy.context.object.rotation_euler[0] = rotation[0]
+        bpy.context.object.rotation_euler[1] = -rotation[1]
+        bpy.context.object.rotation_euler[2] = rotation[2]
+    else:
+        #this is the first time they're being set, must eulify!
+        for i in range (0,3):
+            rotation[i] = math.radians(rotation[i])
+        bpy.context.object.rotation_euler[0] = rotation[0]
+        bpy.context.object.rotation_euler[1] = -rotation[1]
+        bpy.context.object.rotation_euler[2] = rotation[2]
 
     #SCALE
     bpy.context.object.scale[0] = scale[0]
@@ -200,7 +207,7 @@ class Pod(bpy.types.Operator):
  
                 
     def execute(self, context):
-        ob = add_pod(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness, self.location, self.rotation, self.scale, self.file_location)
+        ob = add_pod(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness, self.location, self.rotation, self.scale, self.file_location, False)
         ob = bpy.context.active_object
         ob["component"] = "pod"
         ob["file_location"] = self.file_location
@@ -228,7 +235,7 @@ class updatePod(bpy.types.Operator):
         for obj in scn.objects:
             if obj.select == True:
                 ob = obj
-        newOb = add_pod(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["smoothness"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"])
+        newOb = add_pod(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["smoothness"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"], True)
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "pod"
