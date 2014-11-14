@@ -11,9 +11,6 @@ import bpy, math
 import numpy as np
 import csv
 
-#location of points excel sheet
-file_location = "C:/points.csv"
-
 def getTauPoints():
     with open(file_location, 'r') as f:
         mycsv = csv.reader(f)
@@ -43,26 +40,28 @@ def getZetaPoints():
     return zetaString;
     
 
-def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotation, scale):
+def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotation, scale, file_location):
 
     #Constants
     PIRAD = 3.14159
     TWOPI = 2 * PIRAD
     RqD = PIRAD / 180
 
-    #try to get points from excel sheet
-    try:
-        tau_pointsExcel = getTauPoints()
-        zeta_pointsExcel = getZetaPoints()
-        #split these points with , as delimiter
-        tau_pointsExcel = tau_pointsExcel.split(',')
-        zeta_pointsExcel = zeta_pointsExcel.split(',')
-        #doesnt mean points are correct data type though
-    except:
-        #error finding excel file
-        #so tau/zeta points arent reassigned
-        pass
-    #Since inputs from Blender are a string, this splits the string on commas and makes a list
+    #incomplete if waiting on matricies change from Ben
+    if(file_location != ""):
+        #try to get points from excel sheet
+        try:
+            tau_pointsExcel = getTauPoints()
+            zeta_pointsExcel = getZetaPoints()
+            #split these points with , as delimiter
+            tau_pointsExcel = tau_pointsExcel.split(',')
+            zeta_pointsExcel = zeta_pointsExcel.split(',')
+            #doesnt mean points are correct data type though
+        except:
+            #error finding excel file
+            #so tau/zeta points arent reassigned
+            pass
+        #Since inputs from Blender are a string, this splits the string on commas and makes a list
     tau_points = tau_points.split(',') 
     zeta_points = zeta_points.split(',')
 
@@ -171,7 +170,9 @@ class Pod(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
  
     #Input variables go here
+    
     idname = StringProperty(name="Unique identifier", default="Pod")
+    file_location = StringProperty(name="File Location", default ="")
     delta = FloatProperty(name="Delta", default=0.05)
     chi_eq = StringProperty(name="Chi parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
     tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
@@ -188,6 +189,7 @@ class Pod(bpy.types.Operator):
        col = layout.column()
        #replace this comment with input box and check box for excel filepath
        layout.prop(self, "idname")
+       layout.prop(self, "file_location")
        layout.prop(self, "delta")
        layout.prop(self, "chi_eq")
        layout.prop(self, "tau_points")
@@ -199,9 +201,10 @@ class Pod(bpy.types.Operator):
  
                 
     def execute(self, context):
-        ob = add_pod(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness, self.location, self.rotation, self.scale)
+        ob = add_pod(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness, self.location, self.rotation, self.scale, self.file_location)
         ob = bpy.context.active_object
         ob["component"] = "pod"
+        ob["file_location"] = self.file_location
         ob["delta"] = self.delta
         ob["chi_eq"] = self.chi_eq
         ob["tau_points"] = self.tau_points
@@ -226,7 +229,7 @@ class updatePod(bpy.types.Operator):
         for obj in scn.objects:
             if obj.select == True:
                 ob = obj
-        newOb = add_pod(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["smoothness"], ob.location, ob.rotation_euler, ob.scale)
+        newOb = add_pod(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["smoothness"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"])
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "pod"
@@ -235,6 +238,7 @@ class updatePod(bpy.types.Operator):
         newOb["tau_points"] = ob["tau_points"]
         newOb["zeta_points"] = ob["zeta_points"]
         newOb["smoothness"] = ob["smoothness"]
+        newOb["file_location"] = ob["file_location"]
         ob.select = True
         newOb.select = False
         bpy.ops.object.delete()
