@@ -153,10 +153,8 @@ def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displaceme
         bpy.context.object.rotation_euler[2] = rotation[2]
     else:
         #this is the first time they're being set, must eulify!
-        rotation[0] = rotation[0]*RqD
-        rotation[1] = rotation[1]*RqD
-        rotation[2] = rotation[2]*RqD
-
+        for i in range (0,3):
+            rotation[i] = math.radians(rotation[i])
         bpy.context.object.rotation_euler[0] = rotation[0]
         bpy.context.object.rotation_euler[1] = -rotation[1]
         bpy.context.object.rotation_euler[2] = rotation[2]
@@ -189,7 +187,7 @@ class Wing(bpy.types.Operator):
     wing_length = FloatProperty(name="Adjust wing length", default =3.00, min = 0.00)
 
     location = FloatVectorProperty(name="Location", default = (0.0, 0.0, 0.0), subtype='XYZ')
-    rotation = IntVectorProperty(name="Rotation", default = (0.0, 0.0, 0.0), subtype='XYZ')
+    rotation = FloatVectorProperty(name="Rotation", default = (0.0, 0.0, 0.0), subtype='XYZ')
     scale = FloatVectorProperty(name="Scale", default = (1.0, 1.0, 1.0), subtype='XYZ')
 
     def draw(self, context):
