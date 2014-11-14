@@ -10,29 +10,36 @@ bl_info = {
 import bpy, math
 import numpy as np
 import csv
+
 #location of points excel sheet
-file_location = "C:/points.xlsx"
+file_location = "C:/points.csv"
 
 def getTauPoints():
-    workbook = xlrd.open_workbook(file_location)
-    sheet = workbook.sheet_by_index(0)
-    tauString = ""
-    for i in range(1,7):
-        if i == 6:
-            tauString += str(sheet.cell_value(i,0))
-        else:
-            tauString += str(sheet.cell_value(i,0))+','
+    with open(file_location, 'r') as f:
+        mycsv = csv.reader(f)
+        mycsv = list(mycsv)
+        tauString = ""
+        for i in range(1,7):
+            if i == 6:
+                tauString += mycsv[i][0]
+            else:
+                tauString += mycsv[i][0]+', '
+        print("Tau: " + tauString)
+        f.close()
     return tauString;
 
 def getZetaPoints():
-    workbook = xlrd.open_workbook(file_location)
-    sheet = workbook.sheet_by_index(0)
-    zetaString =""
-    for i in range(1,7):
-        if i == 6:
-            zetaString += str(sheet.cell_value(i,1))
-        else:
-            zetaString += str(sheet.cell_value(i,1))+','
+    with open(file_location, 'r') as f:
+        mycsv = csv.reader(f)
+        mycsv = list(mycsv)
+        zetaString = ""
+        for i in range(1,7):
+            if i == 6:
+                zetaString += mycsv[i][1]
+            else:
+                zetaString += mycsv[i][1]+', '
+        print("Zeta: " + zetaString)
+        f.close()
     return zetaString;
     
 
