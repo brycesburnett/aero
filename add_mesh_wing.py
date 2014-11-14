@@ -274,6 +274,7 @@ class deleteWing(bpy.types.Operator):
         bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
 
+#Add texture - doesn't do anything yet 
 class wingTexture(bpy.types.Operator):
     bl_idname = "mesh.wing_texture"
     bl_label = "Add Texture"
