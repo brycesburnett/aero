@@ -72,6 +72,9 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             layout.separator()
             layout.separator()
             row = layout.row()
+            row.operator("mesh.wing_texture", text="Add Texture", icon='COLOR')
+            layout.separator()
+            row = layout.row()
             row.alignment = 'EXPAND'
             row.operator("mesh.wing_update", text="Update Wing", icon='UV_SYNC_SELECT')
             row.operator("mesh.wing_delete", text="Delete Wing", icon='UGLYPACKAGE')
@@ -97,6 +100,9 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             layout.separator()
             layout.separator()
             row = layout.row()
+            row.operator("mesh.symmetrical_wings_texture", text="Add Texture", icon='COLOR')
+            layout.separator()
+            row = layout.row()
             row.alignment = 'EXPAND'
             row.operator("mesh.symmetrical_wings_update", text="Update Wings", icon='UV_SYNC_SELECT')
             row.operator("mesh.symmetrical_wings_delete", text="Delete Wings", icon='UGLYPACKAGE')
@@ -118,6 +124,9 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             box.prop(obj, 'rotation_euler')
             box.prop(obj, 'scale')
             layout.separator()
+            layout.separator()
+            row = layout.row()
+            row.operator("mesh.fuselage_texture", text="Add Texture", icon='COLOR')
             layout.separator()
             row = layout.row()
             row.alignment = 'EXPAND'
@@ -142,6 +151,9 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             box.prop(obj, 'rotation_euler')
             box.prop(obj, 'scale')
             layout.separator()
+            layout.separator()
+            row = layout.row()
+            row.operator("mesh.pod_texture", text="Add Texture", icon='COLOR')
             layout.separator()
             row = layout.row()
             row.alignment = 'EXPAND'

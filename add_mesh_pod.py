@@ -262,3 +262,8 @@ class deletePod(bpy.types.Operator):
         wm.srch_index = -1
         bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
+
+class podTexture(bpy.types.Operator):
+    bl_idname = "mesh.pod_texture"
+    bl_label = "Add Texture"
+    bl_options = {'INTERNAL'}
