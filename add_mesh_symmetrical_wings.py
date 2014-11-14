@@ -308,7 +308,7 @@ class updateSymmetricalWing(bpy.types.Operator):
         newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob["wing_displacement"], ob.location, ob.rotation_euler, ob.scale)
         newOb = bpy.context.active_object
         newOb.name = ob.name
-        newOb["component"] = "wing"
+        newOb["component"] = "symmetrical wings"
         newOb["delta"] = ob["delta"]
         newOb["chi_eq"] = ob["chi_eq"]
         newOb["tau_points"] = ob["tau_points"]
