@@ -11,9 +11,6 @@ import bpy, math
 import numpy as np
 import csv
 
-#location of points excel sheet
-file_location = "C:/points.csv"
-
 def getTauPoints():
     with open(file_location, 'r') as f:
         mycsv = csv.reader(f)
@@ -43,13 +40,14 @@ def getZetaPoints():
     return zetaString;
     
 
-def add_fuselage(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotation, scale):
+def add_fuselage(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotation, scale, file_location, isUpdate):
 
     #Constants
     PIRAD = 3.14159
     TWOPI = 2 * PIRAD
     RqD = PIRAD / 180
 
+    #NEEDS CHECK FOR FILE LOCATION***AND ISUPDATE
     #try to get points from excel sheet
     try:
         tau_pointsExcel = getTauPoints()
@@ -151,17 +149,24 @@ def add_fuselage(delta, chi_eq, tau_points, zeta_points, smoothness, location, r
     bpy.context.object.location[2] = location[2]
 
     #ROTATION
-    #----------------------------------------
-    #Convert rotation[n] from degrees to radians
-    #----------------------------------------
-    bpy.context.object.rotation_euler[0] = rotation[0]
-    bpy.context.object.rotation_euler[1] = rotation[1]
-    bpy.context.object.rotation_euler[2] = rotation[2]
+    #no need to convert to euler since they have previously been converted at initial creation
+    if isUpdate:
+        bpy.context.object.rotation_euler[0] = rotation[0]
+        bpy.context.object.rotation_euler[1] = -rotation[1]
+        bpy.context.object.rotation_euler[2] = rotation[2]
+    else:
+        #this is the first time they're being set, must eulify!
+        for i in range (0,3):
+            rotation[i] = math.radians(rotation[i])
+        bpy.context.object.rotation_euler[0] = rotation[0]
+        bpy.context.object.rotation_euler[1] = -rotation[1]
+        bpy.context.object.rotation_euler[2] = rotation[2]
 
     #SCALE
     bpy.context.object.scale[0] = scale[0]
     bpy.context.object.scale[1] = scale[1]
     bpy.context.object.scale[2] = scale[2]
+
     
 #    User interface
 #
@@ -176,6 +181,7 @@ class Fuselage(bpy.types.Operator):
  
     #Input variables go here
     idname = StringProperty(name="Unique Identifier", default = "Fuselage")
+    file_location = StringProperty(name="File Location", default="")
     delta = FloatProperty(name="Delta", default=0.05)
     chi_eq = StringProperty(name="Chi parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
     tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.15, 0.23, 0.35, 0.5, 0.65, 0.77, 0.85, 1.0")
@@ -183,7 +189,7 @@ class Fuselage(bpy.types.Operator):
     smoothness = StringProperty(name="Smoothness", description="Smoothness of the fuselage", default = "32")
     
     location = FloatVectorProperty(name="Location", default = (0.0, 0.0, 0.0), subtype='XYZ')
-    rotation = IntVectorProperty(name="Rotation", default = (0.0, 0.0, 0.0), subtype='XYZ')
+    rotation = FloatVectorProperty(name="Rotation", default = (0.0, 0.0, 0.0), subtype='XYZ')
     scale = FloatVectorProperty(name="Scale", default = (1.0, 1.0, 1.0), subtype='XYZ')
 
     def draw(self, context):
@@ -191,6 +197,7 @@ class Fuselage(bpy.types.Operator):
         col = layout.column()
         #replace this comment with input box and check box for excel filepath
         layout.prop(self, "idname")
+        layout.prop(self, "file_location")
         layout.prop(self, "delta")
         layout.prop(self, "chi_eq")
         layout.prop(self, "tau_points")
@@ -201,9 +208,10 @@ class Fuselage(bpy.types.Operator):
         layout.prop(self, "scale")
 
     def execute(self, context):
-        ob = add_fuselage(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness, self.location, self.rotation, self.scale)
+        ob = add_fuselage(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness, self.location, self.rotation, self.scale, self.file_location, False)
         ob = bpy.context.active_object
         ob["component"] = "fuselage"
+        ob["file_location"] = self.file_location
         ob["delta"] = self.delta
         ob["chi_eq"] = self.chi_eq
         ob["tau_points"] = self.tau_points
@@ -228,7 +236,7 @@ class updateWing(bpy.types.Operator):
         for obj in scn.objects:
             if obj.select == True:
                 ob = obj
-        newOb = add_fuselage(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["smoothness"], ob.location, ob.rotation_euler, ob.scale)
+        newOb = add_fuselage(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["smoothness"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"], True)
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "fuselage"
@@ -237,6 +245,7 @@ class updateWing(bpy.types.Operator):
         newOb["tau_points"] = ob["tau_points"]
         newOb["zeta_points"] = ob["zeta_points"]
         newOb["smoothness"] = ob["smoothness"]
+        newOb["file_location"] = ob["file_location"]
         ob.select = True
         newOb.select = False
         bpy.ops.object.delete()
