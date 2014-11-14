@@ -18,7 +18,7 @@ RqD = PIRAD / 180
 TAU_DEFAULT = "0.0, 0.03, 0.19, 0.50, 0.88, 1.00"
 ZETA_DEFAULT = "0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00"
 
-def getTauPoints():
+def getTauPoints(file_location):
     with open(file_location, 'r') as f:
         mycsv = csv.reader(f)
         mycsv = list(mycsv)
@@ -32,7 +32,7 @@ def getTauPoints():
         f.close()
     return tauString;
 
-def getZetaPoints():
+def getZetaPoints(file_location):
     with open(file_location, 'r') as f:
         mycsv = csv.reader(f)
         mycsv = list(mycsv)
@@ -68,20 +68,21 @@ def validateUserPoints(t_points, z_points):
 #index 0 = A, index 1 = B
 #if useExcelPoints is true then try to get excel points
 #else an error most likely occurred and we can bypass trying excel
-def defineMatrices(delta, t_points, z_points, file_location, useExcelPoints):
+def defineMatrices(delta, t_points, z_points, useExcelPoints, file_location):
     print("")
     fail = False
     if useExcelPoints:
         try:
+
             #try to get points from excel sheet
-            t_pointsExc = getTauPoints()
-            z_pointsExc = getZetaPoints()
+            t_pointsExc = getTauPoints(file_location)
+            z_pointsExc = getZetaPoints(file_location)
             #TRY because we don't know if they're valid yet
             #split these points with , as delimiter if valid
             if validateUserPoints(t_pointsExc, z_pointsExc):
-                t_points = t_points.split(',')
-                z_points = z_points.split(',')
-                print("Excel values imported.")
+                t_points = t_pointsExc.split(',')
+                z_points = z_pointsExc.split(',')
+                print("Excel values imported from "+file_location+ ".")
             #else we dont bother using them
             else:
                 fail = True
@@ -161,9 +162,9 @@ def defineMatrices(delta, t_points, z_points, file_location, useExcelPoints):
     AB = [A,B, Np, n]
     return AB
 
-def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, wing_displacement, location, rotation, scale, file_location, isUpdate):
+def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, location, rotation, scale, file_location, isUpdate):
     #passing in tau and zeta points, and true to check excel file when we have capability
-    AB = defineMatrices(delta, tau_points, zeta_points, file_location, False)
+    AB = defineMatrices(delta, tau_points, zeta_points, True, file_location)
     A = AB[0]
     B = AB[1]
     #references of Np and n
@@ -179,29 +180,35 @@ def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacem
         #passing in default tau and zeta points
         #False so the function knows not to waste time by
         #going through excel points
-        AB = defineMatrices(delta, TAU_DEFAULT, ZETA_DEFAULT, file_location, False)
+        AB = defineMatrices(delta, TAU_DEFAULT, ZETA_DEFAULT, False, file_location)
         A = AB[0]
         B = AB[1]
         coefficient = np.linalg.solve(A,B)
-  
+    print("coefficient: ")
+    print(coefficient)
     #The following code turns the coefficient results into strings that can be used by Blender to generate the object.
     #There are three equations, Chi is the y axis, Zeta is the z axis, and x has its own equation that makes each cross section smaller.
     #This code makes a cross section along the y and z axis, for fuselage you'd probably want a cross section along different axes.
-    x_equation = "v-" + str(wing_length)
-    y_equation = "(" + chi_eq.replace("delta", str(delta))
-    y_equation = y_equation + ")*" + str(washout) + "*v-" + str(washout_displacement) + "*v"
-    z_equation = "("
+    c_equation = "-" + str(washout / wing_length) + "*v+" + str(washout)
+    f_equation = str(washout_displacement) + "*v"
 
+    x_equation = "v"
+    a_equation = chi_eq.replace("delta", str(delta))
+    b_equation = "("
     for i in range(1,n+1):
-        z_equation = z_equation + str(coefficient.item(i-1)) + "*u**"+str(i)
+        b_equation = b_equation + str(coefficient.item(i-1)) + "*u**"+str(i)
         if(i != n):
-            z_equation = z_equation + "+"
+            b_equation = b_equation + "+"
         else:
-            z_equation = z_equation + ")*" + str(washout) + "*v"
- 
+            b_equation = b_equation + ")"
+
+    y_equation = "a*c+f"
+    z_equation = "b*c"
+
     #This line actually creates the object
-    bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
-    bpy.ops.mesh.primitive_xyz_function_surface(x_eq="-"+x_equation+"+"+str(wing_displacement), y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=3, range_v_max=wing_length, close_v=True)
+    bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, a_eq=a_equation, b_eq=b_equation, c_eq=c_equation, f_eq=f_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=0, range_v_max=wing_length, close_v=True)
+    bpy.ops.mesh.primitive_xyz_function_surface(x_eq="-"+x_equation, y_eq=y_equation, z_eq=z_equation, a_eq=a_equation, b_eq=b_equation, c_eq=c_equation, f_eq=f_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=0, range_v_max=wing_length, close_v=True)
+    print("Symmetrical Wings successfully created.")
     #join objects together
     for obs in bpy.context.scene.objects:
         if obs.name[0:3] == 'XYZ':
@@ -250,15 +257,14 @@ class SymmetricalWings(bpy.types.Operator):
  
     #Input variables go here
     idname = StringProperty(name="Unique Identifier", default = "Symmetrical Wings")
-    file_location = StringProperty(name="File Location", default = "")
+    file_location = StringProperty(name="File Location", default = "C:/points.csv")
     delta = FloatProperty(name="Delta", default=0.05)
     chi_eq = StringProperty(name="Chi parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
     tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
     zeta_points = StringProperty(name="Zeta points", description="User input points", default="0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00")
-    washout = FloatProperty(name="Washout", default = 0.2)
-    washout_displacement = FloatProperty(name="Washout displacement", default = 0.65)
-    wing_length = FloatProperty(name="Adjust wing length", default =6.0, min = 3.00)
-    wing_displacement = FloatProperty(name="Adjust wing displacement", default = 12.00, min =0.00)
+    washout = FloatProperty(name="Washout", default = 1.0, min = 0.00)
+    washout_displacement = FloatProperty(name="Washout displacement", default = 0.5, min = 0.00)
+    wing_length = FloatProperty(name="Adjust wing length", default =3.2, min = 0.00)
 
     location = FloatVectorProperty(name="Location", default = (0.0, 0.0, 0.0), subtype='XYZ')
     rotation = FloatVectorProperty(name="Rotation", default = (0.0, 0.0, 0.0), subtype='XYZ')
@@ -282,7 +288,7 @@ class SymmetricalWings(bpy.types.Operator):
         layout.prop(self, "scale")
         
     def execute(self, context):
-        ob = add_wings(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.wing_displacement, self.location, self.rotation, self.scale, self.file_location, False)
+        ob = add_wings(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.location, self.rotation, self.scale, self.file_location, False)
         ob = bpy.context.active_object
         ob["component"] = "symmetrical wings"
         ob["file_location"] = self.file_location
@@ -292,7 +298,6 @@ class SymmetricalWings(bpy.types.Operator):
         ob["zeta_points"] = self.zeta_points
         ob["washout"] = self.washout
         ob["washout_displacement"] = self.washout_displacement
-        ob["wing_displacement"] = self.wing_displacement
         ob["wing_length"] = self.wing_length
         ob.name = self.idname
         ob["identifier"] = self.idname
@@ -315,7 +320,7 @@ class updateSymmetricalWing(bpy.types.Operator):
             if obj.select == True:
                 ob = obj
                 break
-        newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob["wing_displacement"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"], True)
+        newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"], True)
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "symmetrical wings"
@@ -324,7 +329,6 @@ class updateSymmetricalWing(bpy.types.Operator):
         newOb["tau_points"] = ob["tau_points"]
         newOb["zeta_points"] = ob["zeta_points"]
         newOb["washout"] = ob["washout"]
-        newOb["wing_displacement"] = ob["wing_displacement"]
         newOb["washout_displacement"] = ob["washout_displacement"]
         newOb["wing_length"] = ob["wing_length"]
         newOb["file_location"] = ob["file_location"]
