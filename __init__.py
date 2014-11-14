@@ -14,14 +14,12 @@ if "bpy" in locals():
     imp.reload(add_mesh_symmetrical_wings)
     imp.reload(add_mesh_pod)
     imp.reload(add_mesh_fuselage)
-    imp.reload(open_file_path)
     imp.reload(update_component)
 else:
     from . import add_mesh_wing
     from . import add_mesh_symmetrical_wings
     from . import add_mesh_pod
     from . import add_mesh_fuselage
-    from . import open_file_path
     from . import update_component
 
 import bpy
@@ -60,13 +58,11 @@ def menu_func(self, context):
 
 def register():
     bpy.utils.register_module(__name__)
-    bpy.types.Scene.filepath = bpy.props.StringProperty (name = "Root Path", default = "", description = "Define the root path of the project", subtype = 'FILE_PATH')
     bpy.types.INFO_MT_mesh_add.append(menu_func)
 
 def unregister():
     bpy.utils.unregister_module(__name__)
     bpy.types.INFO_MT_mesh_add.remove(menu_func)
-    del bpy.types.Scene.filepath
 
 if __name__ == "__main__":
     register()

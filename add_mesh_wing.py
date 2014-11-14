@@ -192,7 +192,7 @@ class Wing(bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         col = layout.column()
-        layout.operator("open.file_path", text = "Open Excel File", icon = 'FILESEL')
+        #replace this comment with input box and check box for excel filepath
         layout.prop(self, "idname")
         layout.prop(self, "delta")
         layout.prop(self, "chi_eq")
