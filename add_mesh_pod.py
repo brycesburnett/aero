@@ -1,17 +1,24 @@
 #This code is needed for an addon as well as deleting the if __name__ statement at the bottom.
 bl_info = {
     "name": "Add Pod",
-	"author": "CSULB CECS 491 Team 4",
-	"version": (1, 0),
-	"description": "Generates a pod using parametric cubic splines.",
-	"category": "Object"
+    "author": "CSULB CECS 491 Team 4",
+    "version": (1, 0),
+    "description": "Generates a pod using parametric cubic splines.",
+    "category": "Object"
 }
 
 import bpy, math
 import numpy as np
 import csv
 
-def getTauPoints():
+#constants
+PIRAD = 3.14159
+TWOPI = 2 * PIRAD
+RqD = PIRAD / 180
+TAU_DEFAULT = "0.0, 0.03, 0.19, 0.50, 0.88, 1.00"
+ZETA_DEFAULT = "0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00"
+
+def getTauPoints(file_location):
     with open(file_location, 'r') as f:
         mycsv = csv.reader(f)
         mycsv = list(mycsv)
@@ -21,11 +28,10 @@ def getTauPoints():
                 tauString += mycsv[i][0]
             else:
                 tauString += mycsv[i][0]+', '
-        print("Tau: " + tauString)
         f.close()
     return tauString;
 
-def getZetaPoints():
+def getZetaPoints(file_location):
     with open(file_location, 'r') as f:
         mycsv = csv.reader(f)
         mycsv = list(mycsv)
@@ -35,58 +41,87 @@ def getZetaPoints():
                 zetaString += mycsv[i][1]
             else:
                 zetaString += mycsv[i][1]+', '
-        print("Zeta: " + zetaString)
         f.close()
     return zetaString;
+
+#returns True if points are valid 
+def validateUserPoints(t_points, z_points):
+    t_split = t_points.split(',')
+    z_split = z_points.split(',')
+    for i in range(0, len(t_split)):
+        try:
+            numb = float(t_split[i])
+        except ValueError:
+            print("Tau point '" + t_split[i] + "'' is not a float.")
+            return False
+    for i in range(0, len(z_split)):
+        try:
+            numb = float(z_split[i])
+        except ValueError:
+            print("Zeta point '" + z_split[i] +"'' is not a float.")
+            return False
+    return True
+
+def defineMatrices(delta, t_points, z_points, useExcelPoints, file_location):
+    print("")
+    fail = False
+    if useExcelPoints:
+        try:
+
+            #try to get points from excel sheet
+            t_pointsExc = getTauPoints(file_location)
+            z_pointsExc = getZetaPoints(file_location)
+            #TRY because we don't know if they're valid yet
+            #split these points with , as delimiter if valid
+            if validateUserPoints(t_pointsExc, z_pointsExc):
+                t_points = t_pointsExc.split(',')
+                z_points = z_pointsExc.split(',')
+                print("Excel values imported from "+file_location+ ".")
+            #else we dont bother using them
+            else:
+                fail = True
+                print("Error with excel values.")
+        except:
+            #error finding excel file
+            #so tau/zeta points arent reassigned
+            print("Error with excel values or finding file.")
+            fail = True
+            pass
+
+        if  fail:
+            print("Using Blender input points...")
+            if validateUserPoints(t_points, z_points):
+                t_points = t_points.split(',')
+                z_points = z_points.split(',') 
+            else:
+                print("Error with Blender input points.")
+                print("Using default points...")
+                t_points = TAU_DEFAULT.split(',')
+                z_points = ZETA_DEFAULT.split(',')
+    else:
+        print("Using Blender input points...")
+        if validateUserPoints(t_points, z_points):
+            t_points = t_points.split(',')
+            z_points = z_points.split(',')
+        else:
+            print("Error with Blender input points")
+            print("Using default points...")
+            t_points = TAU_DEFAULT.split(',')
+            z_points = ZETA_DEFAULT.split(',')
     
+    print("\nTau: " + str(t_points))
+    print("Zeta: " + str(z_points)+"\n")
+    Np = len(z_points)
+    t_array = np.array(np.zeros(Np))
+    z_array = np.array(np.zeros(Np))
+    c_array = np.array(np.zeros(Np))
 
-def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotation, scale, file_location, isUpdate):
-
-    #Constants
-    PIRAD = 3.14159
-    TWOPI = 2 * PIRAD
-    RqD = PIRAD / 180
-
-    #NEEDS CHECK FOR FILE LOCATION***AND ISUPDATE 
-    #try to get points from excel sheet
-    try:
-        tau_pointsExcel = getTauPoints()
-        zeta_pointsExcel = getZetaPoints()
-        #split these points with , as delimiter
-        tau_pointsExcel = tau_pointsExcel.split(',')
-        zeta_pointsExcel = zeta_pointsExcel.split(',')
-        #doesnt mean points are correct data type though
-    except:
-        #error finding excel file
-        #so tau/zeta points arent reassigned
-        pass
-    #Since inputs from Blender are a string, this splits the string on commas and makes a list
-    tau_points = tau_points.split(',') 
-    zeta_points = zeta_points.split(',')
-
-    Np = len(zeta_points) #Number of points
-    tau_S = np.array(np.zeros(Np))
-    zet_S = np.array(np.zeros(Np))
-    chi_S = np.array(np.zeros(Np))
-
-    #Fills the numpy arrays with the list values
-    
-    try:
-        for i in range(0, len(tau_pointsExcel)):
-            #using excel points
-            #there could still be an error with the data type of the value so check the array of points from excel
-            tau_S[i] = tau_pointsExcel[i]
-            zet_S[i] = zeta_pointsExcel[i]
-    except:
-    	#error found in excel points, revert to original
-        for i in range(0, len(tau_points)):
-            #using default points if theres a problem with excel points
-            tau_S[i] = tau_points[i]
-            zet_S[i] = zeta_points[i]
-
-    #Executes code from the tau_chi function
+    #fill arrays
+    for i in range(0, len(t_points)):
+        t_array[i] = t_points[i]
+        z_array[i] = z_points[i]
     for i in range(0, Np):
-        chi_S[i] = 1 - (1 - delta) * math.sin(PIRAD * tau_S[i])
+        c_array[i] = 1 - (1 - delta) * math.sin(PIRAD * t_array[i])
 
     Left_to_Right = 1
     n = Np - 1
@@ -95,10 +130,9 @@ def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotati
     Y = np.array(np.zeros(Np))
 
     for i in range(0,Np):
-        X[i] = tau_S[i] #Probably didn't need to make a new array for these, just following the VB code
-        Y[i] = zet_S[i]
+        X[i] = t_array[i]
+        Y[i] = z_array[i]
 
-    #Executes code from the polyomial function
     Xo = X[0]
     Yo = Y[0]
     Xn = X[n]
@@ -117,8 +151,34 @@ def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotati
                 A[i,j] = (X[i+1] - Xo) ** (j+1)
             else:
                 A[i,j] = (X[n] - Xn) ** (j+1)
+    #place A and B matrices into an array to be accessed later
+    #passing references of Np and n in
+    AB = [A,B, Np, n]
+    return AB
 
-    coefficient = np.linalg.solve(A,B) #Executes code from the gauss and solve functions
+def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotation, scale, file_location, isUpdate):
+
+    #passing in tau and zeta points, and true to check excel file when we have capability
+    AB = defineMatrices(delta, tau_points, zeta_points, True, file_location)
+    A = AB[0]
+    B = AB[1]
+    #references of Np and n
+    Np = AB[2]
+    n = AB[3]
+    
+    try:
+        #Executes code from the gauss and solve functions
+        coefficient = np.linalg.solve(A,B)
+    except:
+        print("Problem with user inputs causing Singular Matrix error.")
+        print("Now using default input points...")
+        #passing in default tau and zeta points
+        #False so the function knows not to waste time by
+        #going through excel points
+        AB = defineMatrices(delta, TAU_DEFAULT, ZETA_DEFAULT, False, file_location)
+        A = AB[0]
+        B = AB[1]
+        coefficient = np.linalg.solve(A,B)
 
     #The following code turns the coefficient results into strings that can be used by Blender to generate the object.
     #There are three equations, Chi is the y axis, Zeta is the z axis, and x has its own equation that makes each cross section smaller.
@@ -132,13 +192,14 @@ def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotati
             z_equation = z_equation + "+"
         else:
             z_equation = z_equation + ")"
-	
+    
     #This line actually creates the object
     bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=False, range_v_min=0, range_v_max=3, close_v=True)
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.spin(steps=int(smoothness), angle=6.28319, center=(0, 0, 0), axis=(0, 1, 0))
     bpy.ops.mesh.remove_doubles()
     bpy.ops.object.mode_set(mode='OBJECT')
+    print("Pod created successfully.")
 
     #LOCATION
     bpy.context.object.location[0] = location[0]
@@ -178,7 +239,7 @@ class Pod(bpy.types.Operator):
     #Input variables go here
     
     idname = StringProperty(name="Unique identifier", default="Pod")
-    file_location = StringProperty(name="File Location", default = "")
+    file_location = StringProperty(name="File Location", default = "C:/points.csv")
     delta = FloatProperty(name="Delta", default=0.05)
     chi_eq = StringProperty(name="Chi parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
     tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
