@@ -7,9 +7,7 @@ class filePath(bpy.types.Operator):
     
     def execute(self, context):
         print(bpy.types.Scene.filepath)
-        #---------------------------------------
-        #DO STUFF WITH FILE HERE
-        #---------------------------------------
+        #THIS CURRENTLY DOES NOTHING NEED TO FIX
         return {'FINISHED'}
 
     def invoke(self, context, event):
