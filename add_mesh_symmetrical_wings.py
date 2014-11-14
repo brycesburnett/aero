@@ -284,6 +284,7 @@ class SymmetricalWings(bpy.types.Operator):
         ob["zeta_points"] = self.zeta_points
         ob["washout"] = self.washout
         ob["washout_displacement"] = self.washout_displacement
+        ob["wing_displacement"] = self.wing_displacement
         ob["wing_length"] = self.wing_length
         ob.name = self.idname
         ob["identifier"] = self.idname
@@ -305,6 +306,7 @@ class updateSymmetricalWing(bpy.types.Operator):
         for obj in scn.objects:
             if obj.select == True:
                 ob = obj
+                break
         newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob["wing_displacement"], ob.location, ob.rotation_euler, ob.scale)
         newOb = bpy.context.active_object
         newOb.name = ob.name
@@ -314,6 +316,7 @@ class updateSymmetricalWing(bpy.types.Operator):
         newOb["tau_points"] = ob["tau_points"]
         newOb["zeta_points"] = ob["zeta_points"]
         newOb["washout"] = ob["washout"]
+        newOb["wing_displacement"] = ob["wing_displacement"]
         newOb["washout_displacement"] = ob["washout_displacement"]
         newOb["wing_length"] = ob["wing_length"]
         ob.select = True
@@ -344,7 +347,6 @@ class deleteSymmetricalWings(bpy.types.Operator):
         bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
 
-#Add texture - doesn't do anything yet 
 class symmetricalWingsTexture(bpy.types.Operator):
     bl_idname = "mesh.symmetrical_wings_texture"
     bl_label = "Add Texture"
