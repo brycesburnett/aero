@@ -164,8 +164,8 @@ def defineMatrices(delta, t_points, z_points, useExcelPoints):
     return AB
 
 def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, wing_displacement, location, rotation, scale):
-    #passing in tau and zeta points, and true to check excel file
-    AB = defineMatrices(delta, tau_points, zeta_points, True)
+    #passing in tau and zeta points, and true to check excel file when we have capability
+    AB = defineMatrices(delta, tau_points, zeta_points, False)
     A = AB[0]
     B = AB[1]
     #references of Np and n
