@@ -344,6 +344,7 @@ class deleteSymmetricalWings(bpy.types.Operator):
         bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
 
+#Add texture - doesn't do anything yet 
 class symmetricalWingsTexture(bpy.types.Operator):
     bl_idname = "mesh.symmetrical_wings_texture"
     bl_label = "Add Texture"
