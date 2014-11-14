@@ -11,9 +11,6 @@ import bpy, math
 import numpy as np
 import csv
 
-#location of points excel sheet
-file_location = "C:/points.csv"
-
 def getTauPoints():
     with open(file_location, 'r') as f:
         mycsv = csv.reader(f)
@@ -43,13 +40,14 @@ def getZetaPoints():
     return zetaString;
     
 
-def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, location, rotation, scale, isUpdate):
+def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, location, rotation, scale, file_location, isUpdate):
 
     #Constants
     PIRAD = 3.14159
     TWOPI = 2 * PIRAD
     RqD = PIRAD / 180
 
+    #NEEDS CHECK FOR FILE LOCATION***
     #try to get points from excel sheet
     try:
         tau_pointsExcel = getTauPoints()
@@ -178,6 +176,7 @@ class Wing(bpy.types.Operator):
     
     #Input variables go here
     idname = StringProperty(name="Unique Identifier", default = "Wing")
+    file_location = StringProperty(name="File Location", default = "")
     delta = FloatProperty(name="Delta", default=0.05)
     chi_eq = StringProperty(name="Chi parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
     tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
@@ -195,6 +194,7 @@ class Wing(bpy.types.Operator):
         col = layout.column()
         #replace this comment with input box and check box for excel filepath
         layout.prop(self, "idname")
+        layout.prop(self, "file_location")
         layout.prop(self, "delta")
         layout.prop(self, "chi_eq")
         layout.prop(self, "tau_points")
@@ -207,9 +207,10 @@ class Wing(bpy.types.Operator):
         layout.prop(self, "scale")
                 
     def execute(self, context):
-        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.location, self.rotation, self.scale, False)
+        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.location, self.rotation, self.scale, self.file_location, False)
         ob = bpy.context.active_object
         ob["component"] = "wing"
+        ob["file_location"] = self.file_location
         ob["delta"] = self.delta
         ob["chi_eq"] = self.chi_eq
         ob["tau_points"] = self.tau_points
@@ -236,7 +237,7 @@ class updateWing(bpy.types.Operator):
         for obj in scn.objects:
             if obj.select == True:
                 ob = obj
-        newOb = add_wing(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale, True)
+        newOb = add_wing(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"], True)
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "wing"
@@ -247,6 +248,7 @@ class updateWing(bpy.types.Operator):
         newOb["washout"] = ob["washout"]
         newOb["washout_displacement"] = ob["washout_displacement"]
         newOb["wing_length"] = ob["wing_length"]
+        newOb["file_location"] = ob["file_location"]
         ob.select = True
         newOb.select = False
         bpy.ops.object.delete()
