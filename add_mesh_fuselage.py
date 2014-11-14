@@ -264,7 +264,8 @@ class deleteFuselage(bpy.types.Operator):
         wm.srch_index = -1
         bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
-
+        
+#Add texture - doesn't do anything yet 
 class fuselageTexture(bpy.types.Operator):
     bl_idname = "mesh.fuselage_texture"
     bl_label = "Add Texture"
