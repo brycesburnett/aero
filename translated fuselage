@@ -1,0 +1,337 @@
+
+def cubic_spline_fuselage_study():
+' Parametric fuselage cubic spline study
+' Phil Barnes, Oct 2014
+'
+' Clear old results, retaining cell format (font, significant digits, etc.)
+  With ActiveSheet: .Range(.Cells(2, 16), .Cells(99, 99)).ClearContents: End With
+'
+' declare spline arrays ; initialize with 0th and 1st elements, resized later
+'
+'       time   station  snake  width/2  upper  equator  lower
+  ReDim ttt(1), xxx(1), dyy(1), www(1), zuu(1), zee(1), zLL(1)
+'
+' get ea. spline L-end constraint, spline knots, and R-end constraint from s'sheet
+' also determine the number of knots
+'
+  for i in range(1, 15):  ' up to this limiting row
+      irow = i + 1     ' 1st row is headers
+      ' L-end constraints on splines x(t), etc.
+      if(irow == 2):
+          eLxxx = Cells(irow, 4): eLdyy = Cells(irow, 5): eLwww = Cells(irow, 6)
+          eLzuu = Cells(irow, 7): eLzee = Cells(irow, 8): eLzLL = Cells(irow, 9)
+      else if(IsEmpty(Cells(irow, 4)) == True): 
+          ' found empty row; backup and store info, including number of knots:
+          irow = irow - 1: Np = irow - 3
+          ' R-end constraints:
+          eRxxx = Cells(irow, 4): eRdyy = Cells(irow, 5): eRwww = Cells(irow, 6)
+          eRzuu = Cells(irow, 7): eRzee = Cells(irow, 8): eRzLL = Cells(irow, 9)
+          break
+      else
+      ' enlarge arrays to accommodate new elements
+          ReDim Preserve _
+          ttt(i + 1), xxx(i + 1), dyy(i + 1), _
+          www(i + 1), zuu(i + 1), zee(i + 1), zLL(i + 1)
+          ' automatically get t(x), given x(t) end constraints
+          xxx(i - 1) = Cells(irow, 4): ttt(i - 1) = Sqr(xxx(i - 1)): Cells(irow, 3) = ttt(i - 1)
+          dyy(i - 1) = Cells(irow, 5): www(i - 1) = Cells(irow, 6)
+          zuu(i - 1) = Cells(irow, 7): zee(i - 1) = Cells(irow, 8)
+          zLL(i - 1) = Cells(irow, 9)
+
+'
+' interpolate and tab prime meridian and equator coordinates at numerous stations
+'
+' spline info, set & solve only once as required for each spline:
+' setup arrays for 1st & 2nd derivatives at all points
+' model 1st derivative as "velocity" and 2nd derivative as "acceleration"
+  ReDim vxxx(Np), axxx(Np), vdyy(Np), adyy(Np), vwww(Np), awww(Np)
+  ReDim vzuu(Np), azuu(Np), vzee(Np), azee(Np), vzLL(Np), azLL(Np)
+'
+' diagnostics:
+'  Cells(36, 2) = "eLxxx=" & CStr(eLxxx)
+'  Cells(37, 2) = "eRxxx=" & CStr(eRxxx)
+'  Cells(38, 2) = "Np=" & CStr(Np)
+'  Cells(39, 2) = "xxx=" & CStr(xxx(1))
+'  Cells(40, 2) = "xxx=" & CStr(xxx(2))
+'  Cells(41, 2) = "xxx=" & CStr(xxx(3))
+'  Cells(42, 2) = "xxx=" & CStr(xxx(4))
+'
+' solve for internal-knot 2nd derivatives:
+  CS_solve(Np, ttt(), xxx(), vxxx(), axxx(), eLxxx, eRxxx)
+  CS_solve(Np, ttt(), dyy(), vdyy(), adyy(), eLdyy, eRdyy)
+  CS_solve(Np, ttt(), www(), vwww(), awww(), eLwww, eRwww)
+  CS_solve(Np, ttt(), zuu(), vzuu(), azuu(), eLzuu, eRzuu)
+  CS_solve(Np, ttt(), zee(), vzee(), azee(), eLzee, eRzee)
+  CS_solve(Np, ttt(), zLL(), vzLL(), azLL(), eLzLL, eRzLL)
+'
+' diagnostic tab of solution for 1st and 2nd derivatives:
+'  For i = 1 To Np
+'  irow = i + 1
+'  Cells(irow, 8) = dxdt_S(i):  Cells(irow, 10) = d2xdt2_S(i)
+'  Cells(irow, 9) = dzdt_S(i):  Cells(irow, 11) = d2zdt2_S(i)
+'  Next i
+'
+  ns = 41  ' points on the math-model curve, cubic spline series
+  for i in range(1, ns):
+      irow = i + 1
+      ttt_ = (i - 1) / (ns - 1): Cells(irow, 19) = ttt_
+'
+' Stop: End
+'
+'
+' spline interpolation of coordinates and rates at time t:
+      CS_intrp(Np, ttt(), xxx(), vxxx(), axxx(), ttt_, xxx_, vxxx_, axxx_): Cells(irow, 20) = xxx_
+      CS_intrp(Np, ttt(), dyy(), vdyy(), adyy(), ttt_, dyy_, vdyy_, adyy_): Cells(irow, 21) = dyy_
+      CS_intrp(Np, ttt(), www(), vwww(), awww(), ttt_, www_, vwww_, awww_): Cells(irow, 22) = www_
+      CS_intrp(Np, ttt(), zuu(), vzuu(), azuu(), ttt_, zuu_, vzuu_, azuu_): Cells(irow, 23) = zuu_
+      CS_intrp(Np, ttt(), zee(), vzee(), azee(), ttt_, zee_, vzee_, azee_): Cells(irow, 24) = zee_
+      CS_intrp(Np, ttt(), zLL(), vzLL(), azLL(), ttt_, zLL_, vzLL_, azLL_): Cells(irow, 25) = zLL_
+'
+' include mirror image of fuselage half width:
+      Cells(irow + ns + 1, 19) = ttt_: Cells(irow + ns + 1, 20) = xxx_: Cells(irow + ns + 1, 22) = 0 - www_
+
+'
+def CS_solve(nn, tt(), xx(), vv(), aa(), ecL, ecR):
+' number of points, time, x, velocity, acceleration, edge constraints
+'
+' Cubic spline solution module
+' Phil Barnes, Oct 2014, Public Domain, www.HowFliesTheAlbatross.com
+'
+' The spline preserves continuous first and second derivatives for
+' any curve without infinite slopes. The usual y(x) curve is modeled
+' here as the linear motion of a particle coordinate x(t) such that
+' the first derivative is thus velocity, and the second derivative
+' becomes acceleration. Edge velocity constraints are set by the user
+' and this module solves for the acceleration at internal knots.
+' The solution herein is obtained only once, and the stored velocity
+' and acceleration arrays are then re-used for any number of
+' interpolations until the curve is changed.
+'
+' Solve for 1st & 2nd derivatives on x(t) at internal nodes
+' Theory: Ralph Pennington, "Intro. Computer Methods..." Macmillan '70
+'
+' Independent L-end, R-end constraints:
+' ec=0 :  "flat" (dc/dt=0), no velocity at end
+' ec=1 :  "stiff" (d^2c/dt^2=0), no acceleration at end
+' ec=2 :  "flexible" (linear extrapolate accelerations of 2 neighbors)
+' ec=_._  "slope-set" non-zero, non-integer slope or velocity, dc/dt
+'
+  ReDim vv(nn), aa(nn)  ' 1st and 2nd derivative arrays
+' number of splines
+  ns = nn - 1: ReDim del(ns), eps(ns)
+' spline length and height
+  for i in range(1, ns):
+      del(i) = tt(i + 1) - tt(i): eps(i) = xx(i + 1) - xx(i)
+      
+' influence coef. and boundary cond. for [F][a]=[B], solution for [a]
+  ReDim FF(nn, nn), BB(nn)
+'
+' 4-points minimum for flexible ends ~ reset to stiff
+  if(nn < 4 and ecL == 2):
+      ecL = 1
+  if(nn < 4 and ecR == 2):
+      ecR = 1
+'
+' -------------------------------------------------
+' influence coefficient matrix, row i, column j
+' -------------------------------------------------
+'
+  vL = 0: vR = 0 ' initialized
+'
+' option to specify velocity at either end:
+  if(ecL <> 0 and ecL <> 1 and ecL <> 2):
+      vL = ecL: ecL = 3
+  if(ecR <> 0 and ecR <> 1 and ecR <> 2):
+      vR = ecR: ecR = 3
+'
+  for i in range(1, nn)
+      for j in range(1, nn)
+' initialize
+          FF(i, j) = 0
+' 1st row (L-edge) stiff end
+          if(ecL == 1 and i == 1 and j == 1):
+              FF(i, j) = 1
+' 1st row (L-edge) horizontal or slope-set end
+          else if((ecL == 3 or ecL == 0) and i == 1 and j == 1): 
+              FF(i, j) = del(1) / 3
+          else if((ecL == 3 or ecL == 0) and i == 1 and j == 2):
+              FF(i, j) = del(1) / 6
+' 1st row (L-edge) flexible end
+          else if( ecL == 2 and i == 1 and j == 1): 
+              FF(i, j) = 1
+          else if(ecL == 2 and i == 1 and j == 2):
+              FF(i, j) = -1 - del(1) / del(2)
+          else if(ecL == 2 and i == 1 and j == 3):
+              FF(i, j) = del(1) / del(2)
+' mid row (all options)
+          else if(i > 1 and i < nn):
+              if(j == i - 1):
+                  FF(i, j) = del(i - 1) / 6
+              else if(j == i + 0):
+                  FF(i, j) = (del(i - 1) + del(i)) / 3
+              else if(j == i + 1):
+                  FF(i, j) = del(i) / 6                 
+' nth row (R-edge) stiff end
+          else if(ecR == 1 and i == nn and j == nn): 
+              FF(i, j) = 1
+' nth row (R-edge) horizontal or slope-set end
+          else if((ecR == 3 or ecR == 0) and i == nn and j == nn - 1):
+              FF(i, j) = -del(ns) / 6
+          else if((ecR == 3 or ecR == 0) and i == nn and j == nn - 0):
+              FF(i, j) = -del(ns) / 3
+' nth row (R-edge) flexible end
+          else if(ecR == 2 and i == nn and j == nn - 0):
+              FF(i, j) = 1
+          else if(ecR == 2 and i == nn and j == nn - 1):
+              FF(i, j) = -1 - del(nn - 1) / del(nn - 2)
+          else if(ecR == 2 and i == nn and j == nn - 2):
+              FF(i, j) = del(nn - 1) / del(nn - 2)
+' boundary conditions
+' initialize
+      BB(i) = 0
+' 1st row (L-edge) stiff end
+      if(ecL == 1 and i == 1): 
+          BB(i) = 0
+' 1st row (L-edge) horizontal or slope-set end
+      else if((ecL == 3 or ecL == 0) and i == 1):
+          BB(i) = eps(1) / del(1) - vL ' last item is L-slope, dx/dt
+' 1st row (L-edge) flexible end
+      else if(ecL == 2 and i == 1):
+          BB(i) = 0
+' mid row (all options)
+      else if(i > 1 and i < nn):
+          BB(i) = eps(i) / del(i) - eps(i - 1) / del(i - 1)
+' nth row (R-edge) stiff end
+      else if(ecR == 1 and i == nn):
+          BB(i) = 0
+' nth row (R-edge) horizontal or slope-set end
+      else if((ecR == 3 or ecR == 0) and i == nn):
+          BB(i) = eps(ns) / del(ns) - vR ' last item is R-slope, dx/dt
+' nth row (R-edge) flexible end
+      else if(ecR == 2 and i == nn):
+          BB(i) = 0
+' ----------------------------------------------
+'
+' solution for 2nd derivatives ("accelerations, aa")
+  Linear_solution(nn, FF(), aa(), BB())
+'
+' 1st derivatives
+  for i in range(1, nn):
+      if(i < nn):
+          vv(i) = eps(i) / del(i) - aa(i) * del(i) / 3 - aa(i + 1) * del(i) / 6
+      else  ' R-end:
+          vv(i) = vv(ns) + aa(ns) * del(ns) / 2 + aa(nn) * del(ns) / 2
+'
+' diagnostics
+'  For i = 1 To nn
+'  For j = 1 To nn
+'  irow = i + 1: jcol = 8 + j
+'  Cells(irow, jcol) = FF(i, j)
+'  Next j
+'  Cells(irow, jcol + 1) = bb(i)
+'  Next i
+'
+
+def CS_intrp(nn, tt(), xx(), vv(), aa(), to_, xo_, vvo, aao)
+' num_pts, arrays (time, x, velocity, accel), interp xo_(to_), get local v&a @ to_
+'
+' Cubic spline interpolation module
+' Given all arrays, interpolate x(t) at any point on the curve
+' Phil Barnes, Oct 2014, Public Domain, www.HowFliesTheAlbatross.com
+'
+  ns = nn - 1: ReDim del(ns), eps(ns) ' ns = # of splines for nn points
+' spline horizontal and vertical excursions:
+  for i in range(1, ns):
+      del(i) = tt(i + 1) - tt(i): eps(i) = xx(i + 1) - xx(i)
+  if( to_ < tt(1)):
+' linear extrapolate left
+      xo_ = xx(1) + vv(1) * (to_ - tt(1))
+      vvo = vv(1) + aa(1) * (to_ - tt(1))
+      d3xdt3 = (aa(2) - aa(1)) / del(1)       ' 3rd derivative
+      aao = aa(1) + d3xdt3 * (to_ - tt(1))
+  else if(to_ > tt(nn)):
+' linear extrapolate right
+      xo_ = xx(nn) + vv(nn) * (to_ - tt(nn))
+      vvo = vv(nn) + aa(nn) * (to_ - tt(nn))
+      d3xdt3 = (aa(nn) - aa(nn - 1)) / del(ns)  ' 3rd derivative
+      aao = aa(1) + d3xdt3 * (to_ - tt(1))
+  else
+' find applicable spline and interpolate
+      for i in range(1, ns):
+          if( tt(i + 1) >= to_):  ' first get shorthand terminology:
+              tmti = to_ - tt(i): epsi = eps(i): deli = del(i)
+              xxi = xx(i): aai = aa(i): dxdti = vv(i): aip1 = aa(i + 1)
+              xo_ = xxi + dxdti * tmti + aai * tmti ^ 2 / 2 + (aip1 - aai) * tmti ^ 3 / (6 * deli)
+              vvo = dxdti + aai * tmti + (aip1 - aai) * tmti ^ 2 / (2 * deli)
+              aao = aai + (aip1 - aai) * tmti / deli
+ 
+def Linear_solution(n_, AA_(), xx_(), BB_())
+' n=rank, [A]=influence coefficient matrix (n x n)
+' [x]=solution column, [B]=boundary condition column
+' auxiliary arrays for solution of [A][x]=[B]
+  ReDim iL_(n_), ss_(n_)
+  Gauss(n_, AA_(), iL_(), ss_())
+  Solve(n_, AA_(), iL_(), BB_(), xx_())
+
+def Gauss(n_, A_(), L_(), s_())
+' Solution of simultaneous linear equations, [A][X] = [B]
+' Gaussian diagonalization with scaled partial pivoting
+' See required companion subroutine Solve
+' Method by Ward Cheney and David Kincaid, Univ. of Texas at Austin
+' "Numerical Mathematics and Computing," pages 220-223
+' Brooks/Cole Publishing Co, 1985
+' Translated from FORTRAN to QBASIC by Phil Barnes, 13 Mar '98
+' Public Domain, www.HowFliesTheAlbatross.com
+'
+'   Operations on [A] matrix only
+'   Note: [A] is modified herein; copy/save before use if req'd
+'   See also subroutine Solve for operations on [B]
+' Instructions, given matrix dimension (n):
+'   pre-dim and define influence matrix ~ redim A_(n,n) ~ A_(i,j)=...
+'   pre-dim and define boundary condition vector ~ redim B_(n) ~ B_(i)=...
+'   pre-dim aux arrays ~ redim L_(n), s_(n) ; all values computed herein
+'   Call Gauss_(n, A_(), L_(), s_())
+'   Call Solve(n, A_(), L_(), B_(), x_())
+'
+  for i in range(1, n_):
+      L_(i) = i
+      smax = 0
+      for j in range(1, n_):
+          if(abs(A_(i, j)) > smax):
+              smax = Abs(A_(i, j))
+      s_(i) = smax
+  for k in range(1, n_ - 1):
+      rmax = 0
+      for i in range(k, n_):
+          R = abs(A_(L_(i), k)) / s_(L_(i))
+          if(R > rmax):
+              j = i
+              rmax = R
+      Lk = L_(j)
+      L_(j) = L_(k)
+      L_(k) = Lk
+      for i in range(k + 1, n_):
+          xm = A_(L_(i), k) / A_(Lk, k)
+          for j in range(k + 1, n_):
+              A_(L_(i), j) = A_(L_(i), j) - xm * A_(Lk, j)
+          A_(L_(i), k) = xm
+  
+def Solve(n_, A_(), L_(), B_(), x_())
+' Solution of simultaneous linear equations, [A][X] = [B]
+' Operations on [B] matrix and solution for [X], given [A], [B]
+' See required companion subroutine Gauss for operations on [A]
+' Method by Ward Cheney and David Kincaid, Univ. of Texas at Austin
+' "Numerical Mathematics and Computing," pages 220-223
+' Brooks/Cole Publishing Co, 1985
+' Translated from FORTRAN to QBASIC by Phil Barnes, 13 Mar '98
+' Public Domain, www.HowFliesTheAlbatross.com
+  for k in range(1, n_ - 1):
+      for i in range(k + 1, n_):
+          B_(L_(i)) = B_(L_(i)) - A_(L_(i), k) * B_(L_(k))
+  x_(n_) = B_(L_(n_)) / A_(L_(n_), n_)
+  for i in range(n_ - 1,1, -1):
+      Sum = B_(L_(i))
+      for j in range(i + 1, n_):
+          Sum = Sum - A_(L_(i), j) * x_(j)
+      x_(i) = Sum / A_(L_(i), i)
+
