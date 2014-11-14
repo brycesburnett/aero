@@ -10,8 +10,6 @@ bl_info = {
 import bpy, math
 import numpy as np
 import csv
-#location of points excel sheet
-file_location = "C:/points.csv"
 
 #constants
 PIRAD = 3.14159
@@ -70,7 +68,7 @@ def validateUserPoints(t_points, z_points):
 #index 0 = A, index 1 = B
 #if useExcelPoints is true then try to get excel points
 #else an error most likely occurred and we can bypass trying excel
-def defineMatrices(delta, t_points, z_points, useExcelPoints):
+def defineMatrices(delta, t_points, z_points, file_location, useExcelPoints):
     print("")
     fail = False
     if useExcelPoints:
@@ -163,9 +161,9 @@ def defineMatrices(delta, t_points, z_points, useExcelPoints):
     AB = [A,B, Np, n]
     return AB
 
-def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, wing_displacement, location, rotation, scale, isUpdate):
+def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, wing_displacement, location, rotation, scale, file_location, isUpdate):
     #passing in tau and zeta points, and true to check excel file when we have capability
-    AB = defineMatrices(delta, tau_points, zeta_points, False)
+    AB = defineMatrices(delta, tau_points, zeta_points, file_location, False)
     A = AB[0]
     B = AB[1]
     #references of Np and n
@@ -181,7 +179,7 @@ def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacem
         #passing in default tau and zeta points
         #False so the function knows not to waste time by
         #going through excel points
-        AB = defineMatrices(delta, TAU_DEFAULT, ZETA_DEFAULT, False)
+        AB = defineMatrices(delta, TAU_DEFAULT, ZETA_DEFAULT, file_location, False)
         A = AB[0]
         B = AB[1]
         coefficient = np.linalg.solve(A,B)
@@ -252,6 +250,7 @@ class SymmetricalWings(bpy.types.Operator):
  
     #Input variables go here
     idname = StringProperty(name="Unique Identifier", default = "Symmetrical Wings")
+    file_location = StringProperty(name="File Location", default = "")
     delta = FloatProperty(name="Delta", default=0.05)
     chi_eq = StringProperty(name="Chi parameterization", description="Equation to automatically parameterize Chi", default="1-(1-delta)*sin(pi*u)+delta*sin(3*pi*u)")
     tau_points = StringProperty(name="Tau points", description="Independent variable 'Time'", default="0.0, 0.03, 0.19, 0.50, 0.88, 1.00")
@@ -270,6 +269,7 @@ class SymmetricalWings(bpy.types.Operator):
         col = layout.column()
         #replace this comment with input box and check box for excel filepath
         layout.prop(self, "idname")
+        layout.prop(self, "file_location")
         layout.prop(self, "delta")
         layout.prop(self, "chi_eq")
         layout.prop(self, "tau_points")
@@ -282,9 +282,10 @@ class SymmetricalWings(bpy.types.Operator):
         layout.prop(self, "scale")
         
     def execute(self, context):
-        ob = add_wings(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.wing_displacement, self.location, self.rotation, self.scale, False)
+        ob = add_wings(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.wing_displacement, self.location, self.rotation, self.scale, self.file_location, False)
         ob = bpy.context.active_object
         ob["component"] = "symmetrical wings"
+        ob["file_location"] = self.file_location
         ob["delta"] = self.delta
         ob["chi_eq"] = self.chi_eq
         ob["tau_points"] = self.tau_points
@@ -314,7 +315,7 @@ class updateSymmetricalWing(bpy.types.Operator):
             if obj.select == True:
                 ob = obj
                 break
-        newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob["wing_displacement"], ob.location, ob.rotation_euler, ob.scale, True)
+        newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob["wing_displacement"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"], True)
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "symmetrical wings"
@@ -326,6 +327,7 @@ class updateSymmetricalWing(bpy.types.Operator):
         newOb["wing_displacement"] = ob["wing_displacement"]
         newOb["washout_displacement"] = ob["washout_displacement"]
         newOb["wing_length"] = ob["wing_length"]
+        newOb["file_location"] = ob["file_location"]
         ob.select = True
         newOb.select = False
         bpy.ops.object.delete()
