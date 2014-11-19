@@ -42,6 +42,7 @@ for i in range(0, number_of_splines):
     DEL[i] = time[i+1] - time[i]
     eps[i] = xx[i+1] - xx[i]
 
+
 FF = np.matrix(np.zeros((number_of_points,number_of_points)))
 BB = np.array(np.zeros(number_of_points))
 
@@ -112,21 +113,18 @@ for i in range(0, number_of_points):
         BB[i] = 0
 
 acceleration = np.linalg.solve(FF,BB)
-
 #1st derivatives
 for i in range(0, number_of_points):
     if(i < number_of_points - 1):
         velocity[i] = eps[i] / DEL[i] - acceleration[i] * DEL[i] / 3 - acceleration[i+1] * DEL[i] / 6
     else:
         velocity[i] = velocity[number_of_splines-1] + acceleration[number_of_splines-1] * DEL[number_of_splines-1] / 2 + acceleration[number_of_points-1] * DEL[number_of_splines-1] / 2
-
-
+        
 #interp
 vert = 41
 holder = np.array(np.zeros(number_of_points))
-print("INTERPOLATION")
 for i in range(0, vert):
-    to_ = (i) / (vert)
+    to_ = i / (vert - 1)
     if (to_ < time[0]):
         xo_ = xx[0] + velocity[0] * (to_ - time[0])
         vvo = velocity[0] + acceleration[0] * (to_ - time[0])
@@ -135,21 +133,21 @@ for i in range(0, vert):
     elif(to_ > time[number_of_points-1]):
         xo_ = xx[number_of_points-1] + velocity[number_of_points-1] * (to_ - time[number_of_points - 1])
         vvo = velocity[number_of_points - 1] + acceleration[number_of_points-1] * (to_ - time[number_of_points - 1])
-        d3xdt3 = (acceleration[number_of_points - 1] - acceleration[number_of_points - 2]) / DEL[number_of_points]
+        d3xdt3 = (acceleration[number_of_points - 1] - acceleration[number_of_points - 2]) / DEL[number_of_splines-1]
         aao = acceleration[0] + d3xdt3 * (to_ - time[0])
     else:
         for j in range(0, number_of_splines):
-            if(time[j] >= to_):
+            if(time[j+1] >= to_):
                 tmti = to_ - time[j]
                 epsi = eps[j]
                 DELI = DEL[j]
                 xxi = xx[j]
                 aai = acceleration[j]
                 dxdti = velocity[j]
-                aip1 = acceleration[j]
+                aip1 = acceleration[j+1]
                 xo_ = xxi + dxdti * tmti + aai * tmti ** 2 / 2 + (aip1 - aai) * tmti ** 3 / (6 * DELI)
                 vvo = dxdti + aai * tmti + (aip1 - aai) * tmti ** 2 / (2 * DELI)                                                                   
                 aao = aai + (aip1 - aai) * tmti / DELI
                 break
-    print(xo_)
+    print(vvo)
 
