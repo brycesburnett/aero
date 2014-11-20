@@ -16,6 +16,7 @@ TWOPI = 2 * PIRAD
 RqD = PIRAD / 180
 TAU_DEFAULT = "0.0, 0.03, 0.19, 0.50, 0.88, 1.00"
 ZETA_DEFAULT = "0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00"
+RADIANS_TO_DEGREES = 57.2957795
 
 def getTauPoints(file_location):
     with open(file_location, 'r') as f:
@@ -265,7 +266,7 @@ class Wing(bpy.types.Operator):
     def execute(self, context):
         ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.location, self.rotation, self.scale, self.file_location, False)
         #convert radians back to degrees
-        self.rotation = self.rotation*radians_to_degrees
+        self.rotation = self.rotation*RADIANS_TO_DEGREES
         ob = bpy.context.active_object
         ob["component"] = "wing"
         ob["file_location"] = self.file_location
@@ -297,7 +298,7 @@ class updateWing(bpy.types.Operator):
                 ob = obj
         #convert radians back to degrees
         for i in range(0,3):
-            ob.rotation_euler[i] = ob.rotation_euler[i] * radians_to_degrees
+            ob.rotation_euler[i] = ob.rotation_euler[i] * RADIANS_TO_DEGREES
             
         newOb = add_wing(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"], True)
         newOb = bpy.context.active_object
