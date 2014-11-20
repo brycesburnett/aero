@@ -365,3 +365,31 @@ class symmetricalWingsTexture(bpy.types.Operator):
     bl_label = "Add Texture"
     bl_options = {'INTERNAL'}
  
+#export data to excel
+class exportSymmetricalWings(bpy.types.Operator):
+    bl_idname = "mesh.symmetrical_wings_export"
+    bl_label = "Export data to Excel? (Click elsewhere to cancel.)"
+    bl_options = {'INTERNAL'}
+        
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+    def execute(self, context):
+        wm = context.window_manager.MyProperties
+        scn = context.scene
+        for obj in scn.objects:
+            if obj.select == True:
+                ob = obj
+        file_export = ob['file_location']
+        with open(file_export, 'w', newline = '') as f:
+            writer = csv.writer(f)
+            exportTau = ob['tau_points']
+            exportTau = exportTau.split(',')
+            exportZeta = ob['zeta_points']
+            exportZeta = exportZeta.split(',')
+            writer.writerow(['Tau', 'Zeta'])
+            for i in range(0, 6): 
+                writer.writerow([exportTau[i], exportZeta[i]])
+            f.close()
+        return {'FINISHED'}

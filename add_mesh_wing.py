@@ -400,19 +400,14 @@ class exportWing(bpy.types.Operator):
             if obj.select == True:
                 ob = obj
         file_export = ob['file_location']
-        with open(file_export, 'r') as f:
+        with open(file_export, 'w', newline = '') as f:
             writer = csv.writer(f)
             exportTau = ob['tau_points']
             exportTau = exportTau.split(',')
-            for row in writer:
-                i = 0
-                row[0] = exportTau[i]
-                i = i+1
             exportZeta = ob['zeta_points']
             exportZeta = exportZeta.split(',')
-            for row in writer:
-                i = 0
-                row[1] = exportTau[i]
-                i = i+1
+            writer.writerow(['Tau', 'Zeta'])
+            for i in range(0, 6): 
+                writer.writerow([exportTau[i], exportZeta[i]])
             f.close()
         return {'FINISHED'}
