@@ -54,13 +54,13 @@ def validateUserPoints(t_points, z_points):
         try:
             numb = float(t_split[i])
         except ValueError:
-            print("Tau point '" + t_split[i] + "'' is not a float.")
+            bpy.ops.error.message('INVOKE_DEFAULT', type = "Error", message = "Tau point '" + t_split[i] + "'' is not a float.")
             return False
     for i in range(0, len(z_split)):
         try:
             numb = float(z_split[i])
         except ValueError:
-            print("Zeta point '" + z_split[i] +"'' is not a float.")
+            bpy.ops.error.message('INVOKE_DEFAULT', type = "Error", message = "Zeta point '" + z_split[i] +"'' is not a float.")
             return False
     return True
 #pass in two strings (user input points) and boolean
@@ -162,7 +162,7 @@ def defineMatrices(delta, t_points, z_points, useExcelPoints, file_location):
     AB = [A,B, Np, n]
     return AB
 
-def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, location, rotation, scale, file_location):
+def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, location, rotation, scale, file_location, isUpdate):
     #passing in tau and zeta points, and true to check excel file when we have capability
     AB = defineMatrices(delta, tau_points, zeta_points, True, file_location)
     A = AB[0]
@@ -227,11 +227,18 @@ def add_wings(delta, chi_eq, tau_points, zeta_points, washout, washout_displacem
     bpy.context.object.location[2] = location[2]
 
     #ROTATION
-    for i in range (0,3):
-        rotation[i] = math.radians(rotation[i])
-    bpy.context.object.rotation_euler[0] = rotation[0]
-    bpy.context.object.rotation_euler[1] = rotation[1]
-    bpy.context.object.rotation_euler[2] = rotation[2]
+    #converts degree values into radians
+    if isUpdate:
+        bpy.context.object.rotation_euler[0] = rotation[0]
+        bpy.context.object.rotation_euler[1] = -rotation[1]
+        bpy.context.object.rotation_euler[2] = rotation[2]
+    else:
+        #this is the first time they're being set, must eulify!
+        for i in range (0,3):
+            rotation[i] = math.radians(rotation[i])
+        bpy.context.object.rotation_euler[0] = rotation[0]
+        bpy.context.object.rotation_euler[1] = -rotation[1]
+        bpy.context.object.rotation_euler[2] = rotation[2]
 
 
     #SCALE
@@ -281,7 +288,7 @@ class SymmetricalWings(bpy.types.Operator):
         layout.prop(self, "scale")
         
     def execute(self, context):
-        ob = add_wings(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.location, self.rotation, self.scale, self.file_location)
+        ob = add_wings(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.location, self.rotation, self.scale, self.file_location, False)
         ob = bpy.context.active_object
         ob["component"] = "symmetrical wings"
         ob["file_location"] = self.file_location
@@ -313,7 +320,7 @@ class updateSymmetricalWing(bpy.types.Operator):
             if obj.select == True:
                 ob = obj
                 break
-        newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"])
+        newOb = add_wings(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"], True)
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "symmetrical wings"
@@ -358,31 +365,41 @@ class symmetricalWingsTexture(bpy.types.Operator):
     bl_label = "Add Texture"
     bl_options = {'INTERNAL'}
  
-#export data to excel
-class exportSymmetricalWings(bpy.types.Operator):
-    bl_idname = "mesh.symmetrical_wings_export"
-    bl_label = "Export data to Excel? (Click elsewhere to cancel.)"
-    bl_options = {'INTERNAL'}
-        
+
+
+
+class MessageOperator(bpy.types.Operator):
+    bl_idname = "error.message"
+    bl_label = "Message"
+    type = StringProperty()
+    message = StringProperty()
+ 
+    def execute(self, context):
+        self.report({'INFO'}, self.message)
+        print(self.message)
+        return {'FINISHED'}
+ 
     def invoke(self, context, event):
         wm = context.window_manager
-        return wm.invoke_props_dialog(self)
-
+        return wm.invoke_popup(self, width=400, height=200)
+ 
+    def draw(self, context):
+        self.layout.label("A message has arrived")
+        row = self.layout.split(0.25)
+        row.prop(self, "Type")
+        row.prop(self, "Message")
+        row = self.layout.split(0.80)
+        row.label("") 
+        row.operator("error.ok")
+ 
+#
+#   The OK button in the error dialog
+#
+class OkOperator(bpy.types.Operator):
+    bl_idname = "error.ok"
+    bl_label = "OK"
     def execute(self, context):
-        wm = context.window_manager.MyProperties
-        scn = context.scene
-        for obj in scn.objects:
-            if obj.select == True:
-                ob = obj
-        file_export = ob['file_location']
-        with open(file_export, 'w', newline = '') as f:
-            writer = csv.writer(f)
-            exportTau = ob['tau_points']
-            exportTau = exportTau.split(',')
-            exportZeta = ob['zeta_points']
-            exportZeta = exportZeta.split(',')
-            writer.writerow(['Tau', 'Zeta'])
-            for i in range(0, 6): 
-                writer.writerow([exportTau[i], exportZeta[i]])
-            f.close()
         return {'FINISHED'}
+
+bpy.utils.register_class(OkOperator)
+bpy.utils.register_class(MessageOperator)
