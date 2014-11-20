@@ -345,3 +345,37 @@ class wingTexture(bpy.types.Operator):
     bl_idname = "mesh.wing_texture"
     bl_label = "Add Texture"
     bl_options = {'INTERNAL'}
+
+#export data to excel
+class exportWing(bpy.types.Operator):
+    bl_idname = "mesh.wing_export"
+    bl_label = "Export data to Excel? (Click elsewhere to cancel.)"
+    bl_options = {'INTERNAL'}
+        
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+    def execute(self, context):
+        wm = context.window_manager.MyProperties
+        scn = context.scene
+        for obj in scn.objects:
+            if obj.select == True:
+                ob = obj
+        file_export = ob['file_location']
+        with open(file_export, 'r') as f:
+            writer = csv.writer(f)
+            exportTau = ob['tau_points']
+            exportTau = exportTau.split(',')
+            for row in writer:
+                i = 0
+                row[0] = exportTau[i]
+                i = i+1
+            exportZeta = ob['zeta_points']
+            exportZeta = exportZeta.split(',')
+            for row in writer:
+                i = 0
+                row[1] = exportTau[i]
+                i = i+1
+            f.close()
+        return {'FINISHED'}
