@@ -207,18 +207,11 @@ def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotati
     bpy.context.object.location[2] = location[2]
 
     #ROTATION
-    #no need to convert to euler since they have previously been converted at initial creation
-    if isUpdate:
-        bpy.context.object.rotation_euler[0] = rotation[0]
-        bpy.context.object.rotation_euler[1] = -rotation[1]
-        bpy.context.object.rotation_euler[2] = rotation[2]
-    else:
-        #this is the first time they're being set, must eulify!
-        for i in range (0,3):
-            rotation[i] = math.radians(rotation[i])
-        bpy.context.object.rotation_euler[0] = rotation[0]
-        bpy.context.object.rotation_euler[1] = -rotation[1]
-        bpy.context.object.rotation_euler[2] = rotation[2]
+    for i in range (0,3):
+        rotation[i] = math.radians(rotation[i])
+    bpy.context.object.rotation_euler[0] = rotation[0]
+    bpy.context.object.rotation_euler[1] = rotation[1]
+    bpy.context.object.rotation_euler[2] = rotation[2]
 
     #SCALE
     bpy.context.object.scale[0] = scale[0]
