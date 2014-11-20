@@ -170,7 +170,7 @@ def defineMatrices(delta, t_points, z_points, useExcelPoints, file_location):
     #passing references of Np and n in
     AB = [A,B, Np, n]
     return AB
-def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, location, rotation, scale, file_location, isUpdate):
+def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, location, rotation, scale, file_location):
 
     #passing in tau and zeta points, and true to check excel file when we have capability
     AB = defineMatrices(delta, tau_points, zeta_points, True, file_location)
@@ -277,7 +277,7 @@ class Wing(bpy.types.Operator):
         layout.prop(self, "scale")
                 
     def execute(self, context):
-        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.location, self.rotation, self.scale, self.file_location, False)
+        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.location, self.rotation, self.scale, self.file_location)
         #convert radians back to degrees
         self.rotation = self.rotation*RADIANS_TO_DEGREES
         ob = bpy.context.active_object
@@ -313,7 +313,7 @@ class updateWing(bpy.types.Operator):
         for i in range(0,3):
             ob.rotation_euler[i] = ob.rotation_euler[i] * RADIANS_TO_DEGREES
             
-        newOb = add_wing(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"], True)
+        newOb = add_wing(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"])
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "wing"
