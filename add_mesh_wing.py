@@ -17,22 +17,6 @@ RqD = PIRAD / 180
 TAU_DEFAULT = "0.0, 0.03, 0.19, 0.50, 0.88, 1.00"
 ZETA_DEFAULT = "0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00"
 
-def makeMaterial(name, diffuse, specular, alpha):
-    mat = bpy.data.materials.new(name)
-    mat.diffuse_color = diffuse
-    mat.diffuse_shader = 'LAMBERT' 
-    mat.diffuse_intensity = 1.0 
-    mat.specular_color = specular
-    mat.specular_shader = 'COOKTORR'
-    mat.specular_intensity = 0.5
-    mat.alpha = alpha
-    mat.ambient = 1
-    return mat
- 
-def setMaterial(ob, mat):
-    me = ob.data
-    me.materials.append(mat)
-
 def getTauPoints(file_location):
     with open(file_location, 'r') as f:
         mycsv = csv.reader(f)
@@ -221,10 +205,11 @@ def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displaceme
     #no need to convert to euler since they have previously been converted at initial creation
     if isUpdate:
         bpy.context.object.rotation_euler[0] = rotation[0]
-        bpy.context.object.rotation_euler[1] = -rotation[1]
+        bpy.context.object.rotation_euler[1] = rotation[1]
         bpy.context.object.rotation_euler[2] = rotation[2]
     else:
         #this is the first time they're being set, must eulify!
+        rotation[1] = 90.0
         for i in range (0,3):
             rotation[i] = math.radians(rotation[i])
         bpy.context.object.rotation_euler[0] = rotation[0]
@@ -260,7 +245,7 @@ class Wing(bpy.types.Operator):
     wing_length = FloatProperty(name="Adjust wing length", default =1.30, min = 0.00)
 
     location = FloatVectorProperty(name="Location", default = (0.0, 0.0, 0.0), subtype='XYZ')
-    rotation = FloatVectorProperty(name="Rotation", default = (0.0, -90.0, 0.0), subtype='XYZ')
+    rotation = FloatVectorProperty(name="Rotation", default = (0.0, 90.0, 0.0), subtype='XYZ')
     scale = FloatVectorProperty(name="Scale", default = (1.0, 1.0, 1.0), subtype='XYZ')
 
     def draw(self, context):
@@ -351,24 +336,8 @@ class deleteWing(bpy.types.Operator):
         bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
 
-#Add texture 
+#Add texture - doesn't do anything yet 
 class wingTexture(bpy.types.Operator):
     bl_idname = "mesh.wing_texture"
     bl_label = "Add Texture"
     bl_options = {'INTERNAL'}
-
-    def invoke(self, context, event):
-        wm = context.window_manager
-        return wm.invoke_props_dialog(self)
-
-    def execute(self, context):
-        wm = context.window_manager.MyProperties
-        scn = context.scene
-        for obj in scn.objects:
-            if obj.select == True:
-                ob = obj
-        red = makeMaterial('Red', (1,0,0), (1,1,1), 1)
-        setMaterial(bpy.context.object, red)
-        wm.srch_index = -1
-        bpy.ops.view3d.obj_search_refresh()
-        return {'FINISHED'}
