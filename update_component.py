@@ -78,6 +78,9 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             row.alignment = 'EXPAND'
             row.operator("mesh.wing_update", text="Update Wing", icon='UV_SYNC_SELECT')
             row.operator("mesh.wing_delete", text="Delete Wing", icon='UGLYPACKAGE')
+            layout.separator()
+            row = layout.row()
+            row.operator("mesh.wing_export", text="Export to Excel", icon='DISK_DRIVE')
         elif(obj["component"] == "symmetrical wings"):
             layout.label("Symmetrical Wing Geometry:", icon = "CURVE_NCURVE")
             row = layout.row()
@@ -106,6 +109,9 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             row.alignment = 'EXPAND'
             row.operator("mesh.symmetrical_wings_update", text="Update Wings", icon='UV_SYNC_SELECT')
             row.operator("mesh.symmetrical_wings_delete", text="Delete Wings", icon='UGLYPACKAGE')
+            layout.separator()
+            row = layout.row()
+            row.operator("mesh.symmetrical_wings_export", text="Export to Excel", icon='DISK_DRIVE')
         elif(obj["component"] == "fuselage"):
             layout.label("Fuselage Geometry:", icon = "CURVE_NCURVE")
             row = layout.row()
@@ -132,6 +138,9 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             row.alignment = 'EXPAND'
             row.operator("mesh.fuselage_update", text="Update Fuselage", icon='UV_SYNC_SELECT')
             row.operator("mesh.fuselage_delete", text="Delete Fuselage", icon='UGLYPACKAGE')
+            layout.separator()
+            row = layout.row()
+            row.operator("mesh.fuselage_export", text="Export to Excel", icon='DISK_DRIVE')
         elif(obj["component"] == "pod"):
             layout.label("Pod Geometry", icon = "CURVE_NCURVE")
             row = layout.row()
@@ -159,6 +168,9 @@ class VIEW3D_PT_search_and_replace(bpy.types.Panel):
             row.alignment = 'EXPAND'
             row.operator("mesh.pod_update", text="Update Pod", icon='UV_SYNC_SELECT')
             row.operator("mesh.pod_delete", text="Delete Pod", icon='UGLYPACKAGE')
+            layout.separator()
+            row = layout.row()
+            row.operator("mesh.pod_export", text="Export to Excel", icon='DISK_DRIVE')
 
 #
 #   Refresh Button
