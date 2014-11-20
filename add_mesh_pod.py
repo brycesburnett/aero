@@ -156,7 +156,7 @@ def defineMatrices(delta, t_points, z_points, useExcelPoints, file_location):
     AB = [A,B, Np, n]
     return AB
 
-def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotation, scale, file_location, isUpdate):
+def add_pod(delta, chi_eq, tau_points, zeta_points, smoothness, location, rotation, scale, file_location):
 
     #passing in tau and zeta points, and true to check excel file when we have capability
     AB = defineMatrices(delta, tau_points, zeta_points, True, file_location)
@@ -261,7 +261,7 @@ class Pod(bpy.types.Operator):
  
                 
     def execute(self, context):
-        ob = add_pod(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness, self.location, self.rotation, self.scale, self.file_location, False)
+        ob = add_pod(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.smoothness, self.location, self.rotation, self.scale, self.file_location)
         ob = bpy.context.active_object
         ob["component"] = "pod"
         ob["file_location"] = self.file_location
@@ -289,7 +289,7 @@ class updatePod(bpy.types.Operator):
         for obj in scn.objects:
             if obj.select == True:
                 ob = obj
-        newOb = add_pod(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["smoothness"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"], True)
+        newOb = add_pod(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["smoothness"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"])
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "pod"
