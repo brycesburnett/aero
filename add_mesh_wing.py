@@ -18,6 +18,22 @@ TAU_DEFAULT = "0.0, 0.03, 0.19, 0.50, 0.88, 1.00"
 ZETA_DEFAULT = "0.00, 0.0007, -0.049, 0.00, 0.0488, 0.00"
 RADIANS_TO_DEGREES = 57.2957795
 
+def makeMaterial(color, diffuse, specular, alpha):
+    mat = bpy.data.materials.new(color)
+    mat.diffuse_color = diffuse
+    mat.diffuse_shader = 'LAMBERT' 
+    mat.diffuse_intensity = 1.0 
+    mat.specular_color = specular
+    mat.specular_shader = 'COOKTORR'
+    mat.specular_intensity = 0.5
+    mat.alpha = alpha
+    mat.ambient = 1
+    return mat
+ 
+def setMaterial(ob, mat):
+    me = ob.data
+    me.materials.append(mat)
+
 def getTauPoints(file_location):
     with open(file_location, 'r') as f:
         mycsv = csv.reader(f)
@@ -340,11 +356,32 @@ class deleteWing(bpy.types.Operator):
         bpy.ops.view3d.obj_search_refresh()
         return {'FINISHED'}
 
-#Add texture - doesn't do anything yet 
+#Add color
 class wingTexture(bpy.types.Operator):
     bl_idname = "mesh.wing_texture"
     bl_label = "Add Texture"
     bl_options = {'INTERNAL'}
+
+    colorwheel = FloatVectorProperty(name="ColorWheel", default = (1.0, 0.0, 0.0), subtype='COLOR')
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+    def execute(self, context):
+        wm = context.window_manager.MyProperties
+        scn = context.scene
+        for obj in scn.objects:
+            if obj.select == True:
+                ob = obj
+
+        color = makeMaterial('name', self.colorwheel, (1,1,1), 1)
+        
+        setMaterial(bpy.context.object, color)
+        
+        wm.srch_index = -1
+        bpy.ops.view3d.obj_search_refresh()
+        return {'FINISHED'}
 
 #export data to excel
 class exportWing(bpy.types.Operator):
