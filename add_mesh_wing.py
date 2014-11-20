@@ -68,13 +68,13 @@ def validateUserPoints(t_points, z_points):
         try:
             numb = float(t_split[i])
         except ValueError:
-            print("Tau point '" + t_split[i] + "'' is not a float.")
+            bpy.ops.error.message('INVOKE_DEFAULT', type = "Error", message = "Tau point '" + t_split[i] + "'' is not a float.")
             return False
     for i in range(0, len(z_split)):
         try:
             numb = float(z_split[i])
         except ValueError:
-            print("Zeta point '" + z_split[i] +"'' is not a float.")
+            bpy.ops.error.message('INVOKE_DEFAULT', type = "Error", message = "Zeta point '" + z_split[i] +"'' is not a float.")
             return False
     return True    
 
@@ -170,7 +170,7 @@ def defineMatrices(delta, t_points, z_points, useExcelPoints, file_location):
     #passing references of Np and n in
     AB = [A,B, Np, n]
     return AB
-def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, location, rotation, scale, file_location):
+def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displacement, wing_length, location, rotation, scale, file_location, isUpdate):
 
     #passing in tau and zeta points, and true to check excel file when we have capability
     AB = defineMatrices(delta, tau_points, zeta_points, True, file_location)
@@ -227,7 +227,7 @@ def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displaceme
     for i in range (0,3):
         rotation[i] = math.radians(rotation[i])
     bpy.context.object.rotation_euler[0] = rotation[0]
-    bpy.context.object.rotation_euler[1] = rotation[1]
+    bpy.context.object.rotation_euler[1] = -rotation[1]
     bpy.context.object.rotation_euler[2] = rotation[2]
 
     #SCALE
@@ -235,6 +235,9 @@ def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displaceme
     bpy.context.object.scale[1] = scale[1]
     bpy.context.object.scale[2] = scale[2]
 
+#    User interface
+#
+ 
 from bpy.props import *
  
 class Wing(bpy.types.Operator):
@@ -256,7 +259,7 @@ class Wing(bpy.types.Operator):
     wing_length = FloatProperty(name="Adjust wing length", default =1.30, min = 0.00)
 
     location = FloatVectorProperty(name="Location", default = (0.0, 0.0, 0.0), subtype='XYZ')
-    rotation = FloatVectorProperty(name="Rotation", default = (0.0, -90.0, 0.0), subtype='XYZ')
+    rotation = FloatVectorProperty(name="Rotation", default = (0.0, 90.0, 0.0), subtype='XYZ')
     scale = FloatVectorProperty(name="Scale", default = (1.0, 1.0, 1.0), subtype='XYZ')
 
     def draw(self, context):
@@ -277,7 +280,7 @@ class Wing(bpy.types.Operator):
         layout.prop(self, "scale")
                 
     def execute(self, context):
-        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.location, self.rotation, self.scale, self.file_location)
+        ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.location, self.rotation, self.scale, self.file_location, False)
         #convert radians back to degrees
         self.rotation = self.rotation*RADIANS_TO_DEGREES
         ob = bpy.context.active_object
@@ -313,7 +316,7 @@ class updateWing(bpy.types.Operator):
         for i in range(0,3):
             ob.rotation_euler[i] = ob.rotation_euler[i] * RADIANS_TO_DEGREES
             
-        newOb = add_wing(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"])
+        newOb = add_wing(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"], True)
         newOb = bpy.context.active_object
         newOb.name = ob.name
         newOb["component"] = "wing"
@@ -408,3 +411,40 @@ class exportWing(bpy.types.Operator):
                 writer.writerow([exportTau[i], exportZeta[i]])
             f.close()
         return {'FINISHED'}
+
+
+class MessageOperator(bpy.types.Operator):
+    bl_idname = "error.message"
+    bl_label = "Message"
+    type = StringProperty()
+    message = StringProperty()
+ 
+    def execute(self, context):
+        self.report({'INFO'}, self.message)
+        print(self.message)
+        return {'FINISHED'}
+ 
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_popup(self, width=400, height=200)
+ 
+    def draw(self, context):
+        self.layout.label("A message has arrived")
+        row = self.layout.split(0.25)
+        row.prop(self, "type")
+        row.prop(self, "message")
+        row = self.layout.split(0.80)
+        row.label("") 
+        row.operator("error.ok")
+ 
+#
+#   The OK button in the error dialog
+#
+class OkOperator(bpy.types.Operator):
+    bl_idname = "error.ok"
+    bl_label = "OK"
+    def execute(self, context):
+        return {'FINISHED'}
+
+bpy.utils.register_class(OkOperator)
+bpy.utils.register_class(MessageOperator)
