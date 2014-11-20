@@ -199,22 +199,19 @@ def add_wing(delta, chi_eq, tau_points, zeta_points, washout, washout_displaceme
     #This line actually creates the object
     bpy.ops.mesh.primitive_xyz_function_surface(x_eq=x_equation, y_eq=y_equation, z_eq=z_equation, a_eq=a_equation, b_eq=b_equation, c_eq=c_equation, f_eq=f_equation, range_u_min=0, range_u_max=1, range_u_step=32, wrap_u=True, range_v_min=0, range_v_max=wing_length, close_v=True)
     print("Wing successfully created.")
-    bpy.context.object.rotation_euler[1] = 1.5708
 
+    #location
+    print(bpy.context.object.location)
+    bpy.context.object.location[0] = location[0]
+    bpy.context.object.location[1] = location[1]
+    bpy.context.object.location[2] = location[2]
+    
     #ROTATION
-    #no need to convert to euler since they have previously been converted at initial creation
-    if isUpdate:
-        bpy.context.object.rotation_euler[0] = rotation[0]
-        bpy.context.object.rotation_euler[1] = rotation[1]
-        bpy.context.object.rotation_euler[2] = rotation[2]
-    else:
-        #this is the first time they're being set, must eulify!
-        rotation[1] = 90.0
-        for i in range (0,3):
-            rotation[i] = math.radians(rotation[i])
-        bpy.context.object.rotation_euler[0] = rotation[0]
-        bpy.context.object.rotation_euler[1] = -rotation[1]
-        bpy.context.object.rotation_euler[2] = rotation[2]
+    for i in range (0,3):
+        rotation[i] = math.radians(rotation[i])
+    bpy.context.object.rotation_euler[0] = rotation[0]
+    bpy.context.object.rotation_euler[1] = -rotation[1]
+    bpy.context.object.rotation_euler[2] = rotation[2]
 
     #SCALE
     bpy.context.object.scale[0] = scale[0]
@@ -267,6 +264,8 @@ class Wing(bpy.types.Operator):
                 
     def execute(self, context):
         ob = add_wing(self.delta, self.chi_eq, self.tau_points, self.zeta_points, self.washout, self.washout_displacement, self.wing_length, self.location, self.rotation, self.scale, self.file_location, False)
+        #convert radians back to degrees
+        self.rotation = self.rotation*radians_to_degrees
         ob = bpy.context.active_object
         ob["component"] = "wing"
         ob["file_location"] = self.file_location
@@ -296,6 +295,10 @@ class updateWing(bpy.types.Operator):
         for obj in scn.objects:
             if obj.select == True:
                 ob = obj
+        #convert radians back to degrees
+        for i in range(0,3):
+            ob.rotation_euler[i] = ob.rotation_euler[i] * radians_to_degrees
+            
         newOb = add_wing(ob["delta"], ob["chi_eq"], ob["tau_points"], ob["zeta_points"], ob["washout"], ob["washout_displacement"], ob["wing_length"], ob.location, ob.rotation_euler, ob.scale, ob["file_location"], True)
         newOb = bpy.context.active_object
         newOb.name = ob.name
